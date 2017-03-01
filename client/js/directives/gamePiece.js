@@ -6,8 +6,14 @@ angular
 
 function gamePiece(squarePosition) {
 
-	function gamePieceCtrl($scope, $element, $attrs) {
+	return {
+		restrict  : "E",
+		controller: GamePieceCtrl,
+		link      : gamePieceLink
+	}
 
+	function GamePieceCtrl($scope, $element, $attrs) {
+		var vm = this;
 	}
 
 	function gamePieceLink(scope, element, attributes, controller) {
@@ -57,11 +63,7 @@ function gamePiece(squarePosition) {
 
 		el.addEventListener("dragstart", dragStart, false);
 		el.addEventListener("dragend", dragEnd, false);
-	}
 
-	return {
-		restrict  : "C",
-		controller: gamePieceCtrl,
-		link      : gamePieceLink
+		//element.on("$destroy", );
 	}
 }

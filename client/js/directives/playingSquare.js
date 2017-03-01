@@ -6,8 +6,14 @@ angular
 
 function playingSquare(squarePosition) {
 
-	function playingSquareCtrl($scope, $element, $attrs) {
+	return {
+		restrict  : "E",
+		controller: PlayingSquareCtrl,
+		link      : playingSquareLink
+	}
 
+	function PlayingSquareCtrl($scope, $element, $attrs) {
+		var vm = this;
 	}
 
 	function playingSquareLink(scope, element) {
@@ -77,11 +83,7 @@ function playingSquare(squarePosition) {
 				return false;
 			}, false);
 		});
-	}
 
-	return {
-		restrict  : "C",
-		controller: playingSquareCtrl,
-		link      : playingSquareLink
+		//element.on("$destroy", );
 	}
 }
