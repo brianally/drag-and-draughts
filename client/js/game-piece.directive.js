@@ -16,13 +16,27 @@
 
 		return directive;
 
-
+		/**
+		 * @name	gamePieceLink
+		 * @desc	Directive post-link function
+		 * @param  {Scope} scope
+		 * @param  {Element} element
+		 * @param  {Object} attributes
+		 * @param  {Controller} controller
+		 * @return void
+		 */
 		function gamePieceLink(scope, element, attributes, controller) {
 			var el   = element[0];
 
 			el.draggable = true;
 			el.dataset.king = false;
 
+			/**
+			 * @name	dragStart
+			 * @desc	
+			 * @param  {Event} evt the event
+			 * @return {Boolean}   false
+			 */
 			function dragStart(evt) {
 				let parentId     = el.parentNode.id;
 				let sourceSquare = document.getElementById(parentId);
@@ -57,6 +71,12 @@
 				return false;
 			}
 
+			/**
+			 * @name		dragEnd
+			 * @desc		Remove "dragging" class from element
+			 * @param  {Event} evt the event
+			 * @return {Boolean}   false
+			 */
 			function dragEnd(evt) {
 				this.classList.remove("dragging");
 				return false;			
@@ -71,6 +91,11 @@
 
 	GamePieceController.$inject = ["$scope"];
 
+	/**
+	 * @name	GamePieceController
+	 * @desc	
+	 * @param {Scope} $scope
+	 */
 	function GamePieceController($scope) {
 		var vm = this;
 	}

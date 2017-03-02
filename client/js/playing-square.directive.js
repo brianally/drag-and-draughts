@@ -5,6 +5,7 @@
 		.module("draughts")
 		.directive("playingSquare", ["squarePositionService", playingSquare]);
 
+
 	function playingSquare(squarePositionService) {
 
 		var directive = {
@@ -16,7 +17,13 @@
 
 		return directive;
 
-
+		/**
+		 * @name	
+		 * @desc	Directive post-link function
+		 * @param  {Scope} scope
+		 * @param  {Element} element
+		 * @return void
+		 */
 		function playingSquareLink(scope, element) {
 			var el = element[0];
 
@@ -93,6 +100,11 @@
 
 	PlayingSquareController.$inject = ["$scope"];
 
+	/**
+	 * @name	PlayingSquareController
+	 * @desc	
+	 * @param {Scope} $scope
+	 */
 	function PlayingSquareController($scope) {
 		var vm = this;
 	}

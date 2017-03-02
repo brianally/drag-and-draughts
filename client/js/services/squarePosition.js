@@ -21,11 +21,12 @@
 		return service;
 
 		/**
-		 * collect positions of all squares
+		 * @name	init
+		 * @desc	collect positions of all squares
 		 * 
-		 * @todo Handle window resize!
+		 * @todo	Handle window resize!
 		 * 
-		 * @return Array
+		 * @return {Array}
 		 */
 		function init() {
 			squares.forEach(sq => {
@@ -42,11 +43,12 @@
 
 
 		/**
-		 * Get the neighbouring squares of one that is being moved from
+		 * @name	getNeighbours
+		 * @desc	Get the neighbouring squares of one that is being moved from
 		 * 
-		 * @param  DOMRect domRect  the source square's positions
-		 * @param  int dir direction of travel: l->r: 1; r->l: -1; king: 0
-		 * @return array   objects with neighbour IDs and positions
+		 * @param	{DOMRect} domRect  the source square's positions
+		 * @param	{Int}			dir direction of travel: l->r: 1; r->l: -1; king: 0
+		 * @return {Array}  objects with neighbour IDs and positions
 		 * @see https://developer.mozilla.org/en-US/docs/Mozilla/Tech/XPCOM/Reference/Interface/nsIDOMClientRect
 		 */
 		function getNeighbours(domRect, dir) {
@@ -71,11 +73,12 @@
 
 
 		/**
-		 * Get the neighbouring squares of one that is being moved from
+		 * @name	getNeighboursFromId
+		 * @desc	Get the neighbouring squares of one that is being moved from
 		 * 
-		 * @param  Int id  the source square id
-		 * @param  Int dir direction of travel: l->r: 1; r->l: -1; king: 0
-		 * @return Array   objects with neighbour IDs and positions
+		 * @param  {Int}		id  the source square id
+		 * @param  {Int}		dir direction of travel: l->r: 1; r->l: -1; king: 0
+		 * @return {Array}  objects with neighbour IDs and positions
 		 */
 		function getNeighboursFromId(id, dir) {
 			let sq      = $document[0].querySelector(`#${id}`);
@@ -86,10 +89,11 @@
 
 
 		/**
-		 * Check whether square landed on is opponent's first row
+		 * @name	isKingsRow
+		 * @desc	Check whether square landed on is opponent's first row
 		 * 
-		 * @param  String  id square ID
-		 * @return Boolean  is, or is not
+		 * @param  {String}  id square ID
+		 * @return {Boolean}  is, or is not
 		 */
 		function isKingsRow(id) {
 			let index = parseFloat(id.substr(2));	// id is eg. sq1, sq22, etc.
