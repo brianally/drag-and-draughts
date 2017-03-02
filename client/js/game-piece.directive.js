@@ -31,6 +31,13 @@
 			el.draggable = true;
 			el.dataset.king = false;
 
+			el.addEventListener("dragstart", dragStart, false);
+			el.addEventListener("dragend", dragEnd, false);
+
+			//element.on("$destroy", );
+			
+			
+
 			/**
 			 * @name	dragStart
 			 * @desc	
@@ -51,9 +58,7 @@
 
 				let hasMove = false;
 
-				neighbours.forEach(function(sq) {
 
-				});
 
 				// need to find occupied neighbours
 				// if occupied, by whom?
@@ -81,11 +86,6 @@
 				this.classList.remove("dragging");
 				return false;			
 			}
-
-			el.addEventListener("dragstart", dragStart, false);
-			el.addEventListener("dragend", dragEnd, false);
-
-			//element.on("$destroy", );
 		}
 	}
 

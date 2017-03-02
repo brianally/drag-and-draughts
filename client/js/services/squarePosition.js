@@ -7,7 +7,7 @@
 
 	function squarePositionService($document) {
 
-		var squares = $document[0].querySelectorAll(".playing-square");
+		var squares = [];
 		var positions = [];
 
 		var service = {
@@ -29,6 +29,7 @@
 		 * @return {Array}
 		 */
 		function init() {
+			squares = $document[0].querySelectorAll(".playing-square");
 			squares.forEach(sq => {
 				let domRect = sq.getBoundingClientRect();
 				let pos = {
@@ -37,7 +38,7 @@
 					bottom: domRect.bottom,
 					right : domRect.right
 				};
-				positions.push({id: sq.id, pos: pos});
+				positions.push({ id: sq.id, pos: pos });
 			});
 		}
 
@@ -52,7 +53,7 @@
 		 * @see https://developer.mozilla.org/en-US/docs/Mozilla/Tech/XPCOM/Reference/Interface/nsIDOMClientRect
 		 */
 		function getNeighbours(domRect, dir) {
-			let neighbours = positions.filter(function(sq) {
+			let neighbours = positions.filter(sq => {
 				return ( sq.pos.right == domRect.left && sq.pos.bottom == domRect.top )
 					||	( sq.pos.left == domRect.right && sq.pos.bottom == domRect.top )
 					|| 	( sq.pos.left == domRect.right && sq.pos.top == domRect.bottom )
@@ -60,15 +61,38 @@
 			});
 
 			// king moves any direction
-			if (dir !== 0) {
-				neighbours = neighbours.filter(function(sq) {
-					return dir > 0
-						? sq.pos.right > domRect.right
-						: sq.pos.left < domRect.left;
-				});
-			}
+			// if (dir !== 0) {
+			// 	neighbours = neighbours.filter(sq => {
+			// 		return dir > 0
+			// 			? sq.pos.right > domRect.right
+			// 			: sq.pos.left < domRect.left;
+			// 	});
+			// }
 
-			return neighbours;
+			// reiterate to give directions
+			let neighboursRelative = {};
+
+			neighbours.forEach(sq => {
+				if ( sq.pos.right == domRect.left && sq.pos.bottom == domRect.top ) {
+
+					neighboursRelative.rtlu = sq;
+
+				} else if ( sq.pos.left == domRect.right && sq.pos.bottom == domRect.top ) {
+
+					neighboursRelative.ltru = sq;
+
+				} else if ( sq.pos.left == domRect.right && sq.pos.top == domRect.bottom ) {
+
+					neighboursRelative.ltrd = sq;
+
+				} else {
+
+					neighboursRelative.rtld = sq;
+
+				}
+			});
+
+			return neighboursRelative;
 		}
 
 
