@@ -17,6 +17,14 @@ playing-square {
 	height: 100px;
 	margin-left:100px;
 	background-color: #AAA;
+	position: relative;
+}
+
+playing-square:after {
+	content: attr(id);
+	display: block;
+	position: absolute;
+	left: 0;
 }
 
 playing-square:nth-child(8n+1) {

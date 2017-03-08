@@ -12,19 +12,58 @@
 			restrict    : "E",
 			controllerAs: "vm",
 			controller  : PlayingSquareController,
-			link        : playingSquareLink
+			compile     : compile
 		}
 
 		return directive;
 
 		/**
-		 * @name	
+		 * @name		compile
+		 * @desc		Removes empty text nodes from template to make it easier
+		 *        	to test whether a given square is can be moved to.
+		 *
+		 * @param		{Element}	tElem
+		 * @returns	{Object}
+		 */
+		function compile(tElem) {
+			var el = tElem[0];
+			
+			for (let i = 0; i < el.childNodes.length; i++) {
+				let child = el.childNodes[i];
+
+				// we don't care about non-empty text nodes; they shouldn't be here
+				if ( child.nodetype === 8 || child.nodeType === 3 ) {
+					el.removeChild(child);
+					i--;
+				}
+			}
+
+			return {
+				pre: preLink,
+				post: postLink
+			}
+		}
+
+
+		/**
+		 * @name		preLink
+		 * @desc		directive pre-link function.Unused
+		 * 
+		 * @param  {Scope} scope
+		 * @param  {Element} iElem
+		 * @return {Void}
+		 */
+		function preLink(scope, iElem) { }
+
+
+		/**
+		 * @name	postLink
 		 * @desc	Directive post-link function
 		 * @param  {Scope} scope
 		 * @param  {Element} element
-		 * @return void
+		 * @return {Void}
 		 */
-		function playingSquareLink(scope, element, attrs, controller) {
+		function postLink(scope, element, attrs, controller) {
 			var el = element[0];
 
 			el.droppable = true;
