@@ -102,6 +102,7 @@
 
 				this.classList.remove("over");
 
+
 				// ensure not empty
 				if ( !el.hasChildNodes() ) {
 
@@ -109,6 +110,7 @@
 					this.appendChild(gamePiece);
 
 					// must tell sibling square to empty itself of text nodes
+					
 
 					// is now king?
 					if (squarePositionService.isKingsRow(el.id)) {

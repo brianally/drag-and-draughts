@@ -66,7 +66,8 @@
 				// 
 
 
-
+				// broadcast source position?
+				// how to let destination square know about staring square?
 
 
 				evt.dataTransfer.effectAllowed = "move";
