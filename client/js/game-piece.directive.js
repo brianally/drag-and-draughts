@@ -54,10 +54,9 @@
 				let direction    = el.classList.contains("king") ? 0 : parseInt(el.dataset.dir);
 				let hasMove      = sqCtrl.hasMove(parentId, colour, direction);
 
-				// is move allowed from here?
+				// is any move allowed from here?
 				if (!hasMove) {
-					console.log("no move!");
-					return false;
+					el.draggable = false;
 				}
 
 				// need to find occupied neighbours

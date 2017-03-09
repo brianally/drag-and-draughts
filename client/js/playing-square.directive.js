@@ -134,11 +134,8 @@
 			function drop(evt) {
 				let data         = JSON.parse(evt.dataTransfer.getData("text/plain"));
 				let gamePiece    = $document[0].querySelectorAll(`#${data.gamePieceId}`)[0];
-				let sourceSquare = $document[0].querySelectorAll(`#${data.sourceId}`)[0];
+				//let sourceSquare = $document[0].querySelectorAll(`#${data.sourceId}`)[0];
 				
-		
-		
-
 				if (evt.stopPropagation) evt.stopPropagation();
 				if (evt.preventDefault) evt.preventDefault();
 
@@ -147,18 +144,18 @@
 				this.classList.remove("over");
 
 
+				// TODO: legal moves only
+				// store legal destinations in data?
+
+
 				// ensure not empty
 				if ( !el.hasChildNodes() ) {
 
-
 					this.appendChild(gamePiece);
-
-					
-					
 
 					// is now king?
 					if (gamePositionService.isKingsRow(el.id)) {
-						gamePiece.classList.add("king");										// FIXME: move to gamePiece
+						gamePiece.classList.add("king");										// FIXME: move to gamePiece directive?
 					}
 				}
 				
@@ -169,6 +166,7 @@
 			}
 		}
 	}
+
 
 	PlayingSquareController.$inject = ["$scope", "$document", "gamePositionService"];
 
@@ -228,8 +226,12 @@
 
 					// can opponent be jumped?
 					if (vm.isOpponent(id, colour)) {
-						let jumpSqId  = positionService.getNeighbourIdOpposite(id, sq.id);
+						let jumpSqId = positionService.getNeighbourIdOpposite(id, sq.id);
 						
+						// edge of game board
+						if (jumpSqId === null) {
+							return false;
+						}
 						return vm.isEmptySquare(jumpSqId);
 					}
 					

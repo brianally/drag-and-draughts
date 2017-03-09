@@ -139,7 +139,7 @@
 		 * 					
 		 * @param  {String} idStart   element.id
 		 * @param  {String} idBetween element.id
-		 * @return {String}           element.id
+		 * @return {String}           element.id or null
 		 */
 		function getNeighbourIdOpposite(idStart, idBetween) {
 
