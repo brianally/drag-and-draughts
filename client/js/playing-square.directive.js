@@ -190,7 +190,7 @@
 		 * @desc		Test whether a piece has a legal move from
 		 *        	starting square
 		 * 
-		 * @param  {Int}  id        starting square element.id
+		 * @param  {String}  id        starting square element.id
 		 * @param  {String}  colour white or black
 		 * @param  {Int}  direction 1: left to right; -1: right to left; 0: any direction
 		 * @return {Boolean}
@@ -244,7 +244,7 @@
 		 * @name		isEmptySquare
 		 * @desc		Check whether a square is empty
 		 * 
-		 * @param  {Int}  id	The square's element.id
+		 * @param  {String}  id	The square's element.id
 		 * @return {Boolean}
 		 */
 		function isEmptySquare(id) {
@@ -259,7 +259,7 @@
 		 * @desc		Check whether the piece occupying a given
 		 *        	square belongs to the opponnent.
 		 *        	
-		 * @param  {Int}  id	The square's element.id
+		 * @param  {String}  id	The square's element.id
 		 * @param  {String}  colour The colour of the MOVING piece
 		 * @return {Boolean}
 		 */

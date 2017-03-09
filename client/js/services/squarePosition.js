@@ -50,7 +50,7 @@
 		 * @name		getPosition
 		 * @desc		text() the position object for a given square
 		 * 
-		 * @param  {Int} id		the square element.id
+		 * @param  {String} id		the square element.id
 		 * @return {Object}   
 		 */
 		function getPosition(id) {
@@ -70,13 +70,17 @@
 		 * @see https://developer.mozilla.org/en-US/docs/Mozilla/Tech/XPCOM/Reference/Interface/nsIDOMClientRect
 		 */
 		function getNeighbours(domRect, dir) {
-			let neighbours = positions.filter(sq => {
+			let neighbours         = [];
+			let neighboursRelative = {};
+
+			neighbours = positions.filter(sq => {
 				return ( sq.pos.right == domRect.left && sq.pos.bottom == domRect.top )
 					||	( sq.pos.left == domRect.right && sq.pos.bottom == domRect.top )
 					|| 	( sq.pos.left == domRect.right && sq.pos.top == domRect.bottom )
 					||	( sq.pos.right == domRect.left && sq.pos.top == domRect.bottom );
 			});
 
+// return all for now
 			// king moves any direction
 			// if (dir !== 0) {
 			// 	neighbours = neighbours.filter(sq => {
@@ -86,9 +90,8 @@
 			// 	});
 			// }
 
-			// reiterate to give directions
-			let neighboursRelative = {};
 
+			// reiterate to give relative directions
 			neighbours.forEach(sq => {
 				if ( sq.pos.right == domRect.left && sq.pos.bottom == domRect.top ) {
 
@@ -117,7 +120,7 @@
 		 * @name	getNeighboursFromId
 		 * @desc	Get the neighbouring squares of one that is being moved from
 		 * 
-		 * @param  {Int}		id  the source square id
+		 * @param  {String}		id  the source element.id
 		 * @param  {Int}		dir direction of travel: l->r: 1; r->l: -1; king: 0
 		 * @return {Array}  objects with neighbour IDs and positions
 		 */
@@ -129,6 +132,15 @@
 		}
 
 
+		/**
+		 * @name		getNeighbourIdOpposite
+		 * @desc		Fetch the ID for the square in line
+		 * 					with starting square and between square
+		 * 					
+		 * @param  {String} idStart   element.id
+		 * @param  {String} idBetween element.id
+		 * @return {String}           element.id
+		 */
 		function getNeighbourIdOpposite(idStart, idBetween) {
 
 			let startSq          = this.getPosition(idStart);
@@ -154,8 +166,9 @@
 		/**
 		 * @name		getNeighbourIdAt
 		 * @desc		Fecth the ID of the square at a given position
+		 * 
 		 * @param  {Object} sides	one or more positions to check
-		 * @return {Int}    the square's element.id
+		 * @return {String}    the square's element.id
 		 */
 		function getNeighbourIdAt(sides) {
 			let neighbour;
@@ -180,7 +193,7 @@
 		 * @name	isKingsRow
 		 * @desc	Check whether square landed on is opponent's first row
 		 * 
-		 * @param  {String}  id square ID
+		 * @param  {String}  id square element.id
 		 * @return {Boolean}  is, or is not
 		 */
 		function isKingsRow(id) {
