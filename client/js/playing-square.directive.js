@@ -217,7 +217,7 @@
 					let key = `${h}${v}`;
 					let sq  = neighbours[key];
 
-					// if starting square is along edge this neighbour may not exist
+					// if starting square is along edge neighbour[key] may not exist
 					if (!sq) return false;
 
 					if (vm.isEmptySquare(sq.id)) {

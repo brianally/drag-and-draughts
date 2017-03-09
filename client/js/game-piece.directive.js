@@ -46,31 +46,32 @@
 			 * @return {Boolean}   false
 			 */
 			function dragStart(evt) {
-				let sqCtrl       = controllers[1];
-				let parentId     = el.parentNode.id;
-				let sourceSquare = $document[0].querySelectorAll(`#${parentId}`);
-				let data         = `{"gamePieceId": "${this.id}", "sourceId": "${parentId}"}`;
-				let colour       = el.classList.contains("white") ? "white" : "black";
-				let direction    = el.classList.contains("king") ? 0 : parseInt(el.dataset.dir);
-				let hasMove      = sqCtrl.hasMove(parentId, colour, direction);
+				let sourceSquare, data, colour, direction, hasMove;
+				let sqCtrl   = controllers[1];
+				let parentId = el.parentNode.id;
 
+				sourceSquare = $document[0].querySelectorAll(`#${parentId}`);
+				colour       = el.classList.contains("white") ? "white" : "black";
+				direction    = el.classList.contains("king") ? 0 : parseInt(el.dataset.dir);
+				data         = {
+					gamePieceId: el.id,
+					sourceId   : parentId
+				};
+
+
+																																		// FIXME: what gives?
 				// is any move allowed from here?
-				if (!hasMove) {
+				if ( !sqCtrl.hasMove(parentId, colour, direction) ) {
 					el.draggable = false;
+					console.log("no move from here!");
 				}
-
-				// need to find occupied neighbours
-				// if occupied, by whom?
-				// if occupied, is opposite sq available?
-				// 
-
 
 				// broadcast source position?
 				// how to let destination square know about staring square?
 
 
 				evt.dataTransfer.effectAllowed = "move";
-				evt.dataTransfer.setData("text/plain", data);
+				evt.dataTransfer.setData("text/plain", JSON.stringify(data));
 
 				this.classList.add("dragging");
 				return false;
