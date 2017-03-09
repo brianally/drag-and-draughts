@@ -46,9 +46,10 @@
 			 * @return {Boolean}   false
 			 */
 			function dragStart(evt) {
-				let sourceSquare, data, colour, direction, hasMove;
+				let sourceSquare, data, colour, direction;
 				let sqCtrl   = controllers[1];
 				let parentId = el.parentNode.id;
+				let moves    = [];
 
 				sourceSquare = $document[0].querySelectorAll(`#${parentId}`);
 				colour       = el.classList.contains("white") ? "white" : "black";
@@ -58,18 +59,16 @@
 					sourceId   : parentId
 				};
 
+				moves = sqCtrl.getMoves(parentId, colour, direction);
 
-																																		// FIXME: what gives?
 				// is any move allowed from here?
-				if ( !sqCtrl.hasMove(parentId, colour, direction) ) {
-					//el.draggable = false;
+				if ( !moves.length ) {
 					evt.preventDefault();
 					return false;
 				}
 
-				// broadcast source position?
-				// how to let destination square know about staring square?
-
+				// store possible moves, including jumps
+				data.moves = moves;
 
 				evt.dataTransfer.effectAllowed = "move";
 				evt.dataTransfer.setData("text/plain", JSON.stringify(data));
@@ -77,6 +76,7 @@
 				this.classList.add("dragging");
 				return false;
 			}
+			
 
 			/**
 			 * @name		dragEnd

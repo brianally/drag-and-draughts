@@ -132,26 +132,35 @@
 			 * @return {Boolean}   false
 			 */
 			function drop(evt) {
-				let data         = JSON.parse(evt.dataTransfer.getData("text/plain"));
-				let gamePiece    = $document[0].querySelectorAll(`#${data.gamePieceId}`)[0];
-				//let sourceSquare = $document[0].querySelectorAll(`#${data.sourceId}`)[0];
-				
+				let thisMove  = {};
+				let data      = getDataTransfer(evt);
+				let gamePiece = $document[0].querySelectorAll(`#${data.gamePieceId}`)[0];
+
 				if (evt.stopPropagation) evt.stopPropagation();
 				if (evt.preventDefault) evt.preventDefault();
 
-				evt.dataTransfer.dropEffect = "move";
+				console.dir(evt.target);
+				console.dir(data);
 
-				this.classList.remove("over");
+				thisMove = data.moves.filter(m => {
+					return m.destination == evt.target.id;
+				})[0];
 
+				if (thisMove) {
+				
+					
 
-				// TODO: legal moves only
-				// store legal destinations in data?
+					evt.dataTransfer.dropEffect = "move";
 
+					this.classList.remove("over");
 
-				// ensure not empty
-				if ( !el.hasChildNodes() ) {
-
+					gamePiece.parentNode.removeChild(gamePiece);
 					this.appendChild(gamePiece);
+
+					if (thisMove.jumped) {
+						let jumpedSquare = $document[0].querySelectorAll(`#${thisMove.jumped}`)[0];
+						jumpedSquare.removeChild( jumpedSquare.firstChild );
+					}
 
 					// is now king?
 					if (gamePositionService.isKingsRow(el.id)) {
@@ -163,6 +172,25 @@
 				this.classList.remove("warn"); // why is this necessary?
 
 				return false;
+			}
+
+
+			/**
+			 * @name		getDataTransfer
+			 * @desc		get the Event.dataTransfer
+			 * 
+			 * @param  {Event}		evt
+			 * @return {Object}		JSON
+			 */
+			function getDataTransfer(evt) {
+				let data    = {};
+				let strData = evt.dataTransfer.getData("text/plain");
+
+				if ( strData.length ) {
+					data = JSON.parse(strData);
+				}
+
+				return data;
 			}
 		}
 	}
@@ -178,23 +206,23 @@
 	function PlayingSquareController($scope, $document, positionService) {
 		var vm = this;
 		
-		this.hasMove       = hasMove;
+		this.getMoves       = getMoves;
 		this.isEmptySquare = isEmptySquare;
 		this.isOpponent    = isOpponent;
 
 
 		/**
-		 * @name		hasMove
+		 * @name		getMoves
 		 * @desc		Test whether a piece has a legal move from
 		 *        	starting square
 		 * 
-		 * @param  {String}  id        starting square element.id
-		 * @param  {String}  colour white or black
-		 * @param  {Int}  direction 1: left to right; -1: right to left; 0: any direction
-		 * @return {Boolean}
+		 * @param  {String}		id        starting square element.id
+		 * @param  {String}		colour		white or black
+		 * @param  {Int}  		direction 1: left to right; -1: right to left; 0: any direction
+		 * @return {Array}							Objects holding IDs of possible squares, with possible jumps
 		 */
-		function hasMove(id, colour, direction) {
-			var canProceed        = false;
+		function getMoves(id, colour, direction) {
+			var moves             = [];
 			var directionsToCheck = [];
 			let neighbours        = positionService.getNeighboursFromId(id, direction);
 			
@@ -212,33 +240,34 @@
 			}
 
 			// neighbour position keys are relative: ltru, ltrd, rtlu, rtld
-			canProceed = ["d", "u"].some(v => {
-				return directionsToCheck.some(h => {
+			["d", "u"].forEach(v => {
+
+				directionsToCheck.forEach(h => {
 					let key = `${h}${v}`;
 					let sq  = neighbours[key];
 
 					// if starting square is along edge neighbour[key] may not exist
-					if (!sq) return false;
-
-					if (vm.isEmptySquare(sq.id)) {
-						return true;
-					}
-
-					// can opponent be jumped?
-					if (vm.isOpponent(sq.id, colour)) {
-						let jumpSqId = positionService.getNeighbourIdOpposite(id, sq.id);
-						
-						// edge of game board
-						if (jumpSqId === null) {
-							return false;
+					if (sq) {
+						if ( vm.isEmptySquare(sq.id) ) {
+							moves.push({ destination: sq.id });
 						}
-						return vm.isEmptySquare(jumpSqId);
-					}
-					
+						else if ( vm.isOpponent(sq.id, colour) ) {
+							// can opponent be jumped?
+							let jumpSqId = positionService.getNeighbourIdOpposite(id, sq.id);
+
+							if (jumpSqId != null) {	// possible if edge of game board
+
+								if ( vm.isEmptySquare(jumpSqId) ) {
+									moves.push({ destination: jumpSqId, jumped: sq.id });
+								}
+							}
+						}
+					}					
 				});
+
 			});
 
-			return canProceed;
+			return moves;
 		}
 
 
