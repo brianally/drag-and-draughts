@@ -3,9 +3,9 @@
 
 	angular
 		.module("draughts")
-		.directive("gamePiece", ["$document", "squarePositionService", gamePiece]);
+		.directive("gamePiece", ["$document", "gamePositionService", gamePiece]);
 
-	function gamePiece($document, squarePositionService) {
+	function gamePiece($document, gamePositionService) {
 
 		var directive = {
 			restrict    : "E",

@@ -3,10 +3,10 @@
 
 	angular
 		.module("draughts")
-		.directive("playingSquare", ["$document", "squarePositionService", playingSquare]);
+		.directive("playingSquare", ["$document", "gamePositionService", playingSquare]);
 
 
-	function playingSquare($document, squarePositionService) {
+	function playingSquare($document, gamePositionService) {
 
 		var directive = {
 			restrict    : "E",
@@ -153,11 +153,11 @@
 
 					this.appendChild(gamePiece);
 
-					// must tell sibling square to empty itself of text nodes
+					
 					
 
 					// is now king?
-					if (squarePositionService.isKingsRow(el.id)) {
+					if (gamePositionService.isKingsRow(el.id)) {
 						gamePiece.classList.add("king");										// FIXME: move to gamePiece
 					}
 				}
@@ -170,14 +170,14 @@
 		}
 	}
 
-	PlayingSquareController.$inject = ["$scope", "$document", "squarePositionService"];
+	PlayingSquareController.$inject = ["$scope", "$document", "gamePositionService"];
 
 	/**
 	 * @name	PlayingSquareController
 	 * @desc	
 	 * @param {Scope} $scope
 	 */
-	function PlayingSquareController($scope, $document, squarePositionService) {
+	function PlayingSquareController($scope, $document, positionService) {
 		var vm = this;
 		
 		this.hasMove       = hasMove;
@@ -198,7 +198,7 @@
 		function hasMove(id, colour, direction) {
 			var canProceed        = false;
 			var directionsToCheck = [];
-			let neighbours        = squarePositionService.getNeighboursFromId(id, direction);
+			let neighbours        = positionService.getNeighboursFromId(id, direction);
 			
 			// fugly!
 			switch (direction) {
@@ -228,7 +228,7 @@
 
 					// can opponent be jumped?
 					if (vm.isOpponent(id, colour)) {
-						let jumpSqId  = squarePositionService.getNeighbourIdOpposite(id, sq.id);
+						let jumpSqId  = positionService.getNeighbourIdOpposite(id, sq.id);
 						
 						return vm.isEmptySquare(jumpSqId);
 					}

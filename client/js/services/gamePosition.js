@@ -3,9 +3,9 @@
 
 	angular
 		.module("draughts")
-		.factory("squarePositionService", squarePositionService);
+		.factory("gamePositionService", gamePositionService);
 
-	function squarePositionService($document) {
+	function gamePositionService($document) {
 
 		var squares = [];
 		var positions = [];
