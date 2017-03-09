@@ -21,7 +21,7 @@
 		/**
 		 * @name		compile
 		 * @desc		Removes empty text nodes from template to make it easier
-		 *        	to test whether a given square is can be moved to.
+		 *        	to test whether a given square can be moved to.
 		 *
 		 * @param		{Element}	tElem
 		 * @returns	{Object}
@@ -225,7 +225,7 @@
 					}
 
 					// can opponent be jumped?
-					if (vm.isOpponent(id, colour)) {
+					if (vm.isOpponent(sq.id, colour)) {
 						let jumpSqId = positionService.getNeighbourIdOpposite(id, sq.id);
 						
 						// edge of game board
@@ -257,7 +257,7 @@
 
 
 		/**
-		 * @name	isOpponent
+		 * @name		isOpponent
 		 * @desc		Check whether the piece occupying a given
 		 *        	square belongs to the opponnent.
 		 *        	
@@ -269,10 +269,9 @@
 			let el = $document[0].querySelectorAll(`#${id}`)[0];
 
 			try {
-				let node = el.childNodes[0];
+				let gamePiece = el.childNodes[0];
 
-				return !el.classList.contains(colour);
-
+				return !gamePiece.classList.contains(colour);
 			} catch (e) {
 				console.log(e.message);
 			}

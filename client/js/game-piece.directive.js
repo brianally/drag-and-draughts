@@ -62,8 +62,9 @@
 																																		// FIXME: what gives?
 				// is any move allowed from here?
 				if ( !sqCtrl.hasMove(parentId, colour, direction) ) {
-					el.draggable = false;
-					console.log("no move from here!");
+					//el.draggable = false;
+					evt.preventDefault();
+					return false;
 				}
 
 				// broadcast source position?
