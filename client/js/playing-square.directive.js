@@ -3,10 +3,10 @@
 
 	angular
 		.module("draughts")
-		.directive("playingSquare", ["squarePositionService", playingSquare]);
+		.directive("playingSquare", ["$document", "squarePositionService", playingSquare]);
 
 
-	function playingSquare(squarePositionService) {
+	function playingSquare($document, squarePositionService) {
 
 		var directive = {
 			restrict    : "E",
@@ -16,6 +16,7 @@
 		}
 
 		return directive;
+
 
 		/**
 		 * @name		compile
@@ -39,7 +40,7 @@
 			}
 
 			return {
-				pre: preLink,
+				pre : preLink,
 				post: postLink
 			}
 		}
@@ -81,7 +82,7 @@
 			});
 
 			//element.on("$destroy", );
-			
+
 
 			/**
 			 * @name		dragEnter
@@ -92,6 +93,7 @@
 			 * @return {Boolean}   false
 			 */
 			function dragEnter(evt) {
+
 				// ensure not empty
 				if ( el.hasChildNodes() ) {
 					this.classList.add("warn");
@@ -131,9 +133,12 @@
 			 */
 			function drop(evt) {
 				let data         = JSON.parse(evt.dataTransfer.getData("text/plain"));
-				let gamePiece    = document.getElementById(data.gamePieceId);
-				let sourceSquare = document.getElementById(data.sourceId);
+				let gamePiece    = $document[0].querySelectorAll(`#${data.gamePieceId}`)[0];
+				let sourceSquare = $document[0].querySelectorAll(`#${data.sourceId}`)[0];
 				
+		
+		
+
 				if (evt.stopPropagation) evt.stopPropagation();
 				if (evt.preventDefault) evt.preventDefault();
 
@@ -165,15 +170,107 @@
 		}
 	}
 
-	PlayingSquareController.$inject = ["$scope"];
+	PlayingSquareController.$inject = ["$scope", "$document", "squarePositionService"];
 
 	/**
 	 * @name	PlayingSquareController
 	 * @desc	
 	 * @param {Scope} $scope
 	 */
-	function PlayingSquareController($scope) {
+	function PlayingSquareController($scope, $document, squarePositionService) {
 		var vm = this;
+		
+		this.hasMove       = hasMove;
+		this.isEmptySquare = isEmptySquare;
+		this.isOpponent    = isOpponent;
+
+
+		/**
+		 * @name		hasMove
+		 * @desc		Test whether a piece has a move to make from this square
+		 * 
+		 * @param  {[type]}  id        [description]
+		 * @param  {[type]}  colour    [description]
+		 * @param  {[type]}  direction [description]
+		 * @return {Boolean}           [description]
+		 */
+		function hasMove(id, colour, direction) {
+			var canProceed        = false;
+			var directionsToCheck = [];
+			let neighbours        = squarePositionService.getNeighboursFromId(id, direction);
+			
+			// fugly!
+			switch (direction) {
+				case 1:
+					directionsToCheck = ["ltr"];
+					break;
+				case -1:
+					directionsToCheck = ["rtl"];
+					break;
+				case 0:
+				default:
+					directionsToCheck = ["ltr", "rtl"];
+			}
+
+
+
+			canProceed = ["d", "u"].some(v => {
+				return directionsToCheck.some(h => {
+					let key = `${h}${v}`;
+					let sq  = neighbours[key];
+console.log(`hasMove: ${key}`);
+					if (vm.isEmptySquare(sq.id)) {
+						return true;
+					}
+
+					// can opponent be jumped?
+					if (vm.isOpponent(id, colour)) {
+						console.log("is opponent");
+					}
+				});
+			});
+
+
+
+			return canProceed;
+		}
+
+
+		/**
+		 * @name		isEmptySquare
+		 * @desc		Check whether a square is empty
+		 * 
+		 * @param  {Int}  id	The square's element.id
+		 * @return {Boolean}
+		 */
+		function isEmptySquare(id) {
+			let el = $document[0].querySelectorAll(`#${id}`);
+
+			return el && el[0].childNodes.length == 0;
+		}
+
+
+		/**
+		 * @name	isOpponent
+		 * @desc		Check whether the piece occupying a given
+		 *        	square belongs to the opponnent.
+		 *        	
+		 * @param  {Int}  id	The square's element.id
+		 * @param  {String}  colour The colour of the MOVING piece
+		 * @return {Boolean}
+		 */
+		function isOpponent(id, colour) {
+			let el = $document[0].querySelectorAll(`#${id}`)[0];
+
+			try {
+				let node = el.childNodes[0];
+
+				return !el.classList.contains(colour);
+
+			} catch (e) {
+				console.log(e.message);
+			}
+		}
 	}
 	
 }());

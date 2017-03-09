@@ -29,7 +29,7 @@
 		 * @return {Array}
 		 */
 		function init() {
-			squares = $document[0].querySelectorAll(".playing-square");
+			squares = $document[0].querySelectorAll("playing-square");
 			squares.forEach(sq => {
 				let domRect = sq.getBoundingClientRect();
 				let pos = {
@@ -107,7 +107,7 @@
 		function getNeighboursFromId(id, dir) {
 			let sq      = $document[0].querySelector(`#${id}`);
 			let domRect = sq.getBoundingClientRect();
-
+			
 			return this.getNeighbours(domRect, dir);
 		}
 

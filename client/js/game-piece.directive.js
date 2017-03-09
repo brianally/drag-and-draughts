@@ -3,13 +3,14 @@
 
 	angular
 		.module("draughts")
-		.directive("gamePiece", ["squarePositionService", gamePiece]);
+		.directive("gamePiece", ["$document", "squarePositionService", gamePiece]);
 
-	function gamePiece(squarePositionService) {
+	function gamePiece($document, squarePositionService) {
 
 		var directive = {
 			restrict    : "E",
 			controllerAs: "vm",
+			require     : ["^gamePiece", "^playingSquare"],
 			controller  : GamePieceController,
 			link        : gamePieceLink
 		}
@@ -25,8 +26,8 @@
 		 * @param  {Controller} controller
 		 * @return void
 		 */
-		function gamePieceLink(scope, element, attributes, controller) {
-			var el   = element[0];
+		function gamePieceLink($scope, element, attributes, controllers) {
+			var el = element[0];
 
 			el.draggable = true;
 			el.dataset.king = false;
@@ -46,19 +47,19 @@
 			 */
 			function dragStart(evt) {
 				let parentId     = el.parentNode.id;
-				let sourceSquare = document.getElementById(parentId);
+				let sourceSquare = $document[0].querySelectorAll(`#${parentId}`);
 				let data         = `{"gamePieceId": "${this.id}", "sourceId": "${parentId}"}`;
 
-
-
 				// is move allowed from here?
-				let direction = el.classList.contains("king") ? 0 : el.dataset.dir;
-				let neighbours = squarePositionService.getNeighboursFromId(parentId, direction);
-				//console.log(neighbours);
+				let colour     = el.classList.contains("white") ? "white" : "black";
+				let direction  = el.classList.contains("king") ? 0 : parseInt(el.dataset.dir);
 
-				let hasMove = false;
+				let hasMove = controllers[1].hasMove(parentId, colour, direction);
 
-
+				if (!hasMove) {
+					console.log("no move!");
+					return false;
+				}
 
 				// need to find occupied neighbours
 				// if occupied, by whom?
