@@ -11,7 +11,6 @@
 	</header>
 	<div class="container testing">
 		<game-board>
-			<!-- This could be formatted nicer but then empty text nodes would be left behind when moving game pieces-->
 			<playing-square id="sq1" droppable="true">
 				<game-piece class="white king" data-dir="1" draggable="true" id="w1"></game-piece>
 			</playing-square>
@@ -104,6 +103,7 @@
 	<script src="js/app.js"></script>
 	<script src="js/services/lb-services.js"></script>
 	<script src="js/services/gamePosition.js"></script>
+	<script src="js/game-board.directive.js"></script>
 	<script src="js/playing-square.directive.js"></script>
 	<script src="js/game-piece.directive.js"></script>
 </body>

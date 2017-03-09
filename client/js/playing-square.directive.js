@@ -139,17 +139,12 @@
 				if (evt.stopPropagation) evt.stopPropagation();
 				if (evt.preventDefault) evt.preventDefault();
 
-				console.dir(evt.target);
-				console.dir(data);
-
 				thisMove = data.moves.filter(m => {
 					return m.destination == evt.target.id;
 				})[0];
 
 				if (thisMove) {
 				
-					
-
 					evt.dataTransfer.dropEffect = "move";
 
 					this.classList.remove("over");
@@ -157,13 +152,21 @@
 					gamePiece.parentNode.removeChild(gamePiece);
 					this.appendChild(gamePiece);
 
-					if (thisMove.jumped) {
+					if ( thisMove.jumped ) {
 						let jumpedSquare = $document[0].querySelectorAll(`#${thisMove.jumped}`)[0];
-						jumpedSquare.removeChild( jumpedSquare.firstChild );
+						let JumpedId = jumpedSquare.firstChild.id;
+
+						// need to $destroy
+						//jumpedSquare.removeChild( jumpedSquare.firstChild );
+						// console.dir(jumpedSquare.firstChild);
+						// angular.element(jumpedSquare.firstChild).remove();
+
+						// report upwards
+						scope.$emit('gamePiece.jumped', {square: jumpedSquare.id, piece: JumpedId});
 					}
 
 					// is now king?
-					if (gamePositionService.isKingsRow(el.id)) {
+					if ( gamePositionService.isKingsRow(el.id) ) {
 						gamePiece.classList.add("king");										// FIXME: move to gamePiece directive?
 					}
 				}
@@ -304,6 +307,11 @@
 			} catch (e) {
 				console.log(e.message);
 			}
+		}
+
+
+		function removeGamePiece(squareId) {
+
 		}
 	}
 	

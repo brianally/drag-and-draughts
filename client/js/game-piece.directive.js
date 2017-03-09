@@ -18,15 +18,16 @@
 		return directive;
 
 		/**
-		 * @name	gamePieceLink
-		 * @desc	Directive post-link function
-		 * @param  {Scope} scope
-		 * @param  {Element} element
-		 * @param  {Object} attributes
-		 * @param  {Controller} controller
-		 * @return void
+		 * @name		gamePieceLink
+		 * @desc		Directive post-link function
+		 * 
+		 * @param		{Scope} scope
+		 * @param		{Element} element
+		 * @param		{Object} attributes
+		 * @param		{Controller} controller
+		 * @return	{Void}
 		 */
-		function gamePieceLink($scope, element, attributes, controllers) {
+		function gamePieceLink(scope, element, attributes, controllers) {
 			var el = element[0];
 
 			el.draggable = true;
@@ -35,8 +36,24 @@
 			el.addEventListener("dragstart", dragStart, false);
 			el.addEventListener("dragend", dragEnd, false);
 
-			//element.on("$destroy", );
-			
+			// scope.$on("$destroy", function(event, data) {
+			// 	el.removeEventListener("dragstart", dragStart, false);
+			// 	el.removeEventListener("dragend", dragEnd, false);
+			// 	console.log(`destroyed: ${el.id}`);
+			// });
+
+
+			scope.$on("gamePiece.jumped", function(event, data) {
+
+				if (data.piece == el.id) {
+
+					// This destroys ALL gamePiece scopes :-(
+					//scope.$destroy();
+					el.removeEventListener("dragstart", dragStart, false);
+					el.removeEventListener("dragend", dragEnd, false);
+					el.parentNode.removeChild(el);
+				}
+			});
 			
 
 			/**
@@ -76,7 +93,7 @@
 				this.classList.add("dragging");
 				return false;
 			}
-			
+
 
 			/**
 			 * @name		dragEnd
@@ -98,7 +115,7 @@
 	 * @desc	
 	 * @param {Scope} $scope
 	 */
-	function GamePieceController($scope) {
+	function GamePieceController($scope, $element) {
 		var vm = this;
 	}
 }());
