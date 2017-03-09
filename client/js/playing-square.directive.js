@@ -187,12 +187,13 @@
 
 		/**
 		 * @name		hasMove
-		 * @desc		Test whether a piece has a move to make from this square
+		 * @desc		Test whether a piece has a legal move from
+		 *        	starting square
 		 * 
-		 * @param  {[type]}  id        [description]
-		 * @param  {[type]}  colour    [description]
-		 * @param  {[type]}  direction [description]
-		 * @return {Boolean}           [description]
+		 * @param  {Int}  id        starting square element.id
+		 * @param  {String}  colour white or black
+		 * @param  {Int}  direction 1: left to right; -1: right to left; 0: any direction
+		 * @return {Boolean}
 		 */
 		function hasMove(id, colour, direction) {
 			var canProceed        = false;
@@ -212,25 +213,28 @@
 					directionsToCheck = ["ltr", "rtl"];
 			}
 
-
-
+			// neighbour position keys are relative: ltru, ltrd, rtlu, rtld
 			canProceed = ["d", "u"].some(v => {
 				return directionsToCheck.some(h => {
 					let key = `${h}${v}`;
 					let sq  = neighbours[key];
-console.log(`hasMove: ${key}`);
+
+					// if starting square is along edge this neighbour may not exist
+					if (!sq) return false;
+
 					if (vm.isEmptySquare(sq.id)) {
 						return true;
 					}
 
 					// can opponent be jumped?
 					if (vm.isOpponent(id, colour)) {
-						console.log("is opponent");
+						let jumpSqId  = squarePositionService.getNeighbourIdOpposite(id, sq.id);
+						
+						return vm.isEmptySquare(jumpSqId);
 					}
+					
 				});
 			});
-
-
 
 			return canProceed;
 		}

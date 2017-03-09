@@ -46,16 +46,15 @@
 			 * @return {Boolean}   false
 			 */
 			function dragStart(evt) {
+				let sqCtrl       = controllers[1];
 				let parentId     = el.parentNode.id;
 				let sourceSquare = $document[0].querySelectorAll(`#${parentId}`);
 				let data         = `{"gamePieceId": "${this.id}", "sourceId": "${parentId}"}`;
+				let colour       = el.classList.contains("white") ? "white" : "black";
+				let direction    = el.classList.contains("king") ? 0 : parseInt(el.dataset.dir);
+				let hasMove      = sqCtrl.hasMove(parentId, colour, direction);
 
 				// is move allowed from here?
-				let colour     = el.classList.contains("white") ? "white" : "black";
-				let direction  = el.classList.contains("king") ? 0 : parseInt(el.dataset.dir);
-
-				let hasMove = controllers[1].hasMove(parentId, colour, direction);
-
 				if (!hasMove) {
 					console.log("no move!");
 					return false;

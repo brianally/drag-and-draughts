@@ -11,9 +11,12 @@
 		var positions = [];
 
 		var service = {
-			getNeighbours      : getNeighbours,
-			getNeighboursFromId: getNeighboursFromId,
-			isKingsRow         : isKingsRow
+			getPosition           : getPosition,
+			getNeighbours         : getNeighbours,
+			getNeighboursFromId   : getNeighboursFromId,
+			getNeighbourIdOpposite: getNeighbourIdOpposite,
+			getNeighbourIdAt      : getNeighbourIdAt,
+			isKingsRow            : isKingsRow
 		};
 
 		init();
@@ -40,6 +43,20 @@
 				};
 				positions.push({ id: sq.id, pos: pos });
 			});
+		}
+
+
+		/**
+		 * @name		getPosition
+		 * @desc		text() the position object for a given square
+		 * 
+		 * @param  {Int} id		the square element.id
+		 * @return {Object}   
+		 */
+		function getPosition(id) {
+			return positions.filter(p => {
+				return p.id == id;
+			})[0];
 		}
 
 
@@ -107,9 +124,56 @@
 		function getNeighboursFromId(id, dir) {
 			let sq      = $document[0].querySelector(`#${id}`);
 			let domRect = sq.getBoundingClientRect();
-			
+
 			return this.getNeighbours(domRect, dir);
 		}
+
+
+		function getNeighbourIdOpposite(idStart, idBetween) {
+
+			let startSq          = this.getPosition(idStart);
+			let betweenSq        = this.getPosition(idBetween);
+			let destinationSides = {};
+			let oppositeKey      = "";
+
+			// got to be a better way
+			for (let k in startSq.pos) {
+				oppositeKey = getOpposite(k);
+
+				if (startSq.pos[k] == betweenSq.pos[oppositeKey]) {
+					// Corners meet. If k is "left", destination's "right"
+					// will equal between's "left", and so on
+					destinationSides[oppositeKey] = betweenSq.pos[k];
+				}
+			}
+
+			return this.getNeighbourIdAt(destinationSides);
+		}
+
+
+		/**
+		 * @name		getNeighbourIdAt
+		 * @desc		Fecth the ID of the square at a given position
+		 * @param  {Object} sides	one or more positions to check
+		 * @return {Int}    the square's element.id
+		 */
+		function getNeighbourIdAt(sides) {
+			let neighbour;
+
+			neighbour = positions.filter(p => {
+				for (let s in sides) {
+					if (p.pos[s] !== sides[s]) return false;
+				}
+				return true;
+			});
+
+			if (neighbour[0] && neighbour[0].id) {
+				return neighbour[0].id;
+			}
+
+			return null;
+		}
+
 
 
 		/**
@@ -125,6 +189,29 @@
 
 			return mod == 1 || mod == 0;
 		}
+
+
+		function getOpposite(str) {
+			let opposite = "";
+			switch (str) {
+					case "bottom":
+						opposite = "top";
+						break;
+					case "left":
+						opposite = "right";
+						break;
+					case "right":
+						opposite = "left";
+						break;
+					case "top":
+						opposite = "bottom";
+						break;
+					default:
+
+				}
+				return opposite;
+		}
 	}
+
 
 }());
