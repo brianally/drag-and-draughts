@@ -1,6 +1,6 @@
 {
   "name": "drag-and-draughts",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "main": "server/server.js",
   "scripts": {
     "lint": "eslint .",
@@ -26,6 +26,6 @@
     "type": "",
     "url": ""
   },
-  "license": "UNLICENSED",
+  "license": "MIT",
   "description": "drag-and-draughts"
 }
