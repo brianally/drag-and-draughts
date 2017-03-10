@@ -23,6 +23,8 @@
 
 		return service;
 
+		// TODO: Handle window resize
+
 		/**
 		 * @name	init
 		 * @desc	collect positions of all squares

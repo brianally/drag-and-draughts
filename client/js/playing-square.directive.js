@@ -81,8 +81,6 @@
 				}, false);
 			});
 
-			//element.on("$destroy", );
-
 
 			/**
 			 * @name		dragEnter
@@ -139,6 +137,8 @@
 				if (evt.stopPropagation) evt.stopPropagation();
 				if (evt.preventDefault) evt.preventDefault();
 
+				// data.moves holds all possible moves for the piece. 
+				// Extract the one for this square.
 				thisMove = data.moves.filter(m => {
 					return m.destination == evt.target.id;
 				})[0];
@@ -146,23 +146,19 @@
 				if (thisMove) {
 				
 					evt.dataTransfer.dropEffect = "move";
-
 					this.classList.remove("over");
 
+					// move the DOM element
 					gamePiece.parentNode.removeChild(gamePiece);
 					this.appendChild(gamePiece);
 
+					// if a piece was jumped, handle that.
 					if ( thisMove.jumped ) {
 						let jumpedSquare = $document[0].querySelectorAll(`#${thisMove.jumped}`)[0];
-						let JumpedId = jumpedSquare.firstChild.id;
-
-						// need to $destroy
-						//jumpedSquare.removeChild( jumpedSquare.firstChild );
-						// console.dir(jumpedSquare.firstChild);
-						// angular.element(jumpedSquare.firstChild).remove();
+						let JumpedPiece = jumpedSquare.firstChild;
 
 						// report upwards
-						scope.$emit('gamePiece.jumped', {square: jumpedSquare.id, piece: JumpedId});
+						scope.$emit('gamePiece.jumped', {square: jumpedSquare.id, piece: JumpedPiece.id});
 					}
 
 					// is now king?
@@ -309,10 +305,6 @@
 			}
 		}
 
-
-		function removeGamePiece(squareId) {
-
-		}
 	}
 	
 }());
