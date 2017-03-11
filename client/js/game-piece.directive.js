@@ -82,6 +82,7 @@
 
 				// is any move allowed from here?
 				if ( !moves.length ) {
+					console.log("no moves!");
 					evt.preventDefault();
 					return false;
 				}

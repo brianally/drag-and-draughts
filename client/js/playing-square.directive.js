@@ -224,7 +224,8 @@
 			var moves             = [];
 			var directionsToCheck = [];
 			let neighbours        = positionService.getNeighboursFromId(id, direction);
-			
+console.log("neighbours");
+console.log(neighbours);
 			// fugly!
 			switch (direction) {
 				case 1:

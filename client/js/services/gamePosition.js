@@ -37,12 +37,20 @@
 			squares = $document[0].querySelectorAll("playing-square");
 			squares.forEach(sq => {
 				let domRect = sq.getBoundingClientRect();
-				let pos = {
-					left  : domRect.left,
-					top   : domRect.top,
-					bottom: domRect.bottom,
-					right : domRect.right
-				};
+				let pos     = {};
+
+				// The updated CSS for the square sizes uses percent to several
+				// decimal places to allow for proportional game board.
+				// But this causes the DOMRect to similarly use high-precision,
+				// which means that the corner positions of adjoining squares
+				// no longer match without rounding.
+				// 
+				// DOMRect (from getBoundingClientRect) is getter-only so we
+				// cannot update in place.
+				for (let side in domRect) {
+					pos[side] = Math.round(domRect[side]);
+				}
+
 				positions.push({ id: sq.id, pos: pos });
 			});
 		}
@@ -129,8 +137,14 @@
 		function getNeighboursFromId(id, dir) {
 			let sq      = $document[0].querySelector(`#${id}`);
 			let domRect = sq.getBoundingClientRect();
+			let pos     = {};
 
-			return this.getNeighbours(domRect, dir);
+			// see comment in init()
+			for (let side in domRect) {
+				pos[side] = Math.round(domRect[side]);
+			}
+
+			return this.getNeighbours(pos, dir);
 		}
 
 
