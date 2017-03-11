@@ -3,14 +3,13 @@
 
 	angular
 		.module("draughts")
-		.factory("gamePositionService", gamePositionService);
+		.factory("gamePositionService", ["$document", "$window", gamePositionService]);
 
-	function gamePositionService($document) {
+	function gamePositionService($document, $window) {
 
-		var squares = [];
+		var squares   = [];
 		var positions = [];
-
-		var service = {
+		var service   = {
 			getPosition           : getPosition,
 			getNeighbours         : getNeighbours,
 			getNeighboursFromId   : getNeighboursFromId,
@@ -23,7 +22,6 @@
 
 		return service;
 
-		// TODO: Handle window resize
 
 		/**
 		 * @name	init
@@ -53,6 +51,8 @@
 
 				positions.push({ id: sq.id, pos: pos });
 			});
+
+			angular.element($window).bind('resize', init);
 		}
 
 
