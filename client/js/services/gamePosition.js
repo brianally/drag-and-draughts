@@ -18,7 +18,8 @@
 			isKingsRow            : isKingsRow
 		};
 
-		init();
+		// directives don't exist yet
+		//init();
 
 		return service;
 
@@ -32,7 +33,7 @@
 		 * @return {Array}
 		 */
 		function init() {
-			squares = $document[0].querySelectorAll("playing-square");
+			squares = $document[0].querySelectorAll(".playing-square");
 			squares.forEach(sq => {
 				let domRect = sq.getBoundingClientRect();
 				let pos     = {};
@@ -64,6 +65,8 @@
 		 * @return {Object}   
 		 */
 		function getPosition(id) {
+			if ( !positions.length ) init();	// hacky!
+
 			return positions.filter(p => {
 				return p.id == id;
 			})[0];
@@ -80,6 +83,8 @@
 		 * @see https://developer.mozilla.org/en-US/docs/Mozilla/Tech/XPCOM/Reference/Interface/nsIDOMClientRect
 		 */
 		function getNeighbours(domRect, dir) {
+			if ( !positions.length ) init();	// sacky!
+
 			let neighbours         = [];
 			let neighboursRelative = {};
 
@@ -105,19 +110,19 @@
 			neighbours.forEach(sq => {
 				if ( sq.pos.right == domRect.left && sq.pos.bottom == domRect.top ) {
 
-					neighboursRelative.rtlu = sq;
+					neighboursRelative.nw = sq;
 
 				} else if ( sq.pos.left == domRect.right && sq.pos.bottom == domRect.top ) {
 
-					neighboursRelative.ltru = sq;
+					neighboursRelative.ne = sq;
 
 				} else if ( sq.pos.left == domRect.right && sq.pos.top == domRect.bottom ) {
 
-					neighboursRelative.ltrd = sq;
+					neighboursRelative.se = sq;
 
 				} else {
 
-					neighboursRelative.rtld = sq;
+					neighboursRelative.sw = sq;
 
 				}
 			});
@@ -146,6 +151,7 @@
 
 			return this.getNeighbours(pos, dir);
 		}
+
 
 
 		/**

@@ -7,15 +7,26 @@
 
 	function gamePiece($document, gamePositionService) {
 
+		var template = `<div 	class="game-piece {{ piece.color }}"
+													data-dir="{{ piece.direction }}"
+													data-piece-id="{{ piece.id }}"
+													draggable="true"></div>`;
+
 		var directive = {
 			restrict    : "E",
 			controllerAs: "vm",
-			require     : ["^gamePiece", "^playingSquare"],
-			controller  : GamePieceController,
-			link        : gamePieceLink
+			scope: {
+				piece: "="
+			},
+			replace   : true,
+			template  : template,
+			require   : ["^gamePiece", "^playingSquare"],
+			controller: GamePieceController,
+			link      : gamePieceLink
 		}
 
 		return directive;
+
 
 		/**
 		 * @name		gamePieceLink
@@ -77,12 +88,15 @@
 					gamePieceId: el.id,
 					sourceId   : parentId
 				};
-
+console.log(parentId, colour, direction);
 				moves = sqCtrl.getMoves(parentId, colour, direction);
-
+console.log(moves);
 				// is any move allowed from here?
 				if ( !moves.length ) {
+
 					console.log("no moves!");
+
+					
 					evt.preventDefault();
 					return false;
 				}

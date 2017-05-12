@@ -8,12 +8,29 @@
 
 	function playingSquare($document, gamePositionService) {
 
+		var template = `<div	class="playing-square"
+													id="sq{{ sqId }}"
+													droppable="true">
+											<game-piece	ng-if="!!piece"
+												piece="piece"></game-piece>
+										</div>`;
+
+
 		var directive = {
 			restrict    : "E",
 			controllerAs: "vm",
-			controller  : PlayingSquareController,
-			compile     : compile
+			scope: {
+				sqId  : "@",
+				piece : "=",
+				update: "&"
+			},
+			replace   : true,
+			template  : template,
+			controller: PlayingSquareController,
+			link      : postLink
 		}
+
+
 
 		return directive;
 
@@ -132,7 +149,7 @@
 			function drop(evt) {
 				let thisMove  = {};
 				let data      = getDataTransfer(evt);
-				let gamePiece = $document[0].querySelectorAll(`#${data.gamePieceId}`)[0];
+				let gamePiece = $document[0].querySelectorAll(`#${data.pieceId}`).item(0);
 
 				if (evt.stopPropagation) evt.stopPropagation();
 				if (evt.preventDefault) evt.preventDefault();
@@ -148,18 +165,30 @@
 					evt.dataTransfer.dropEffect = "move";
 					this.classList.remove("over");
 
-					// move the DOM element
-					gamePiece.parentNode.removeChild(gamePiece);
-					this.appendChild(gamePiece);
+					// // move the DOM element
+					// gamePiece.parentNode.removeChild(gamePiece);
+					// this.appendChild(gamePiece);
+
+					scope.update()(data.sourceId, thisMove.destination);
+
 
 					// if a piece was jumped, handle that.
 					if ( thisMove.jumped ) {
-						let jumpedSquare = $document[0].querySelectorAll(`#${thisMove.jumped}`)[0];
-						let JumpedPiece = jumpedSquare.firstChild;
+						let JumpedPiece = controller.getPieceOnSquare(thisMove.jumped);
+
+						scope.update()(thisMove.jumped);
 
 						// report upwards
-						scope.$emit('gamePiece.jumped', {square: jumpedSquare.id, piece: JumpedPiece.id});
+						//scope.$emit('gamePiece.jumped', {square: jumpedSquare.id, piece: JumpedPiece.id});
 					}
+
+
+
+
+
+
+
+
 
 					// is now king?
 					if ( gamePositionService.isKingsRow(el.id) ) {
@@ -205,9 +234,10 @@
 	function PlayingSquareController($scope, $document, positionService) {
 		var vm = this;
 		
-		this.getMoves       = getMoves;
-		this.isEmptySquare = isEmptySquare;
-		this.isOpponent    = isOpponent;
+		this.getMoves         = getMoves;
+		this.isEmptySquare    = isEmptySquare;
+		this.isOpponent       = isOpponent;
+		this.getPieceOnSquare = getPieceOnSquare;
 
 
 		/**
@@ -224,26 +254,25 @@
 			var moves             = [];
 			var directionsToCheck = [];
 			let neighbours        = positionService.getNeighboursFromId(id, direction);
-console.log("neighbours");
-console.log(neighbours);
+
 			// fugly!
 			switch (direction) {
 				case 1:
-					directionsToCheck = ["ltr"];
+					directionsToCheck = ["s"];
 					break;
 				case -1:
-					directionsToCheck = ["rtl"];
+					directionsToCheck = ["n"];
 					break;
 				case 0:
 				default:
-					directionsToCheck = ["ltr", "rtl"];
+					directionsToCheck = ["n", "s"];
 			}
 
 			// neighbour position keys are relative: ltru, ltrd, rtlu, rtld
-			["d", "u"].forEach(v => {
+			["e", "w"].forEach(h => {
 
-				directionsToCheck.forEach(h => {
-					let key = `${h}${v}`;
+				directionsToCheck.forEach(v => {
+					let key = `${v}${h}`;
 					let sq  = neighbours[key];
 
 					// if starting square is along edge neighbour[key] may not exist
@@ -266,7 +295,6 @@ console.log(neighbours);
 				});
 
 			});
-
 			return moves;
 		}
 
@@ -279,9 +307,9 @@ console.log(neighbours);
 		 * @return {Boolean}
 		 */
 		function isEmptySquare(id) {
-			let el = $document[0].querySelectorAll(`#${id}`);
+			let gamePiece = getPieceOnSquare(id);
 
-			return el && el[0].childNodes.length == 0;
+			return gamePiece === false;
 		}
 
 
@@ -295,15 +323,29 @@ console.log(neighbours);
 		 * @return {Boolean}
 		 */
 		function isOpponent(id, colour) {
-			let el = $document[0].querySelectorAll(`#${id}`)[0];
-
 			try {
-				let gamePiece = el.childNodes[0];
+				let gamePiece = getPieceOnSquare(id);
 
-				return !gamePiece.classList.contains(colour);
+				if (gamePiece) {
+					return !gamePiece.classList.contains(colour);
+				}
+
+				return false;
+				
 			} catch (e) {
 				console.log(e.message);
 			}
+		}
+
+
+		function getPieceOnSquare(id) {
+			let el        = $document[0].querySelectorAll(`#${id}`).item(0);
+			let gamePiece = el.querySelectorAll(".game-piece").item(0);
+
+			if (gamePiece) {
+				return gamePiece;
+			}
+			return false;
 		}
 
 	}

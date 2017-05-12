@@ -28,7 +28,7 @@ game-board {
 	to return likewise, so abutting squares do not share the
 	same values, eg. a.right/b.left, a.bottom/b.top
  */
-playing-square {
+.playing-square {
 	float           : left;
 	display         : block;
 	width           : 12.49999998%;
@@ -39,7 +39,7 @@ playing-square {
 }
 
 
-.testing playing-square:after {
+.testing .playing-square:after {
 	content : attr(id);
 	display : block;
 	position: absolute;
@@ -48,12 +48,12 @@ playing-square {
 	z-index : 100;
 }
 
-playing-square:nth-child(8n+1) {
+.playing-square:nth-child(8n+1) {
 	margin-left: 0;
 }
 
 
-game-piece {
+.game-piece {
 	display      : block;
 	width        : 90%;
 	height       : 90%;
