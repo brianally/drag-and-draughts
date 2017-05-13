@@ -20,14 +20,16 @@
 			restrict    : "E",
 			controllerAs: "vm",
 			scope: {
-				sqId  : "@",
-				piece : "=",
-				update: "&"
+				sqId   : "@",
+				piece  : "=",
+				move   : "&",
+				capture: "&",
+				king   : "&"
 			},
 			replace   : true,
 			template  : template,
 			controller: PlayingSquareController,
-			link      : postLink
+			link      : playingSquareLink
 		}
 
 
@@ -35,53 +37,17 @@
 		return directive;
 
 
-		/**
-		 * @name		compile
-		 * @desc		Removes empty text nodes from template to make it easier
-		 *        	to test whether a given square can be moved to.
-		 *
-		 * @param		{Element}	tElem
-		 * @returns	{Object}
-		 */
-		function compile(tElem) {
-			var el = tElem[0];
-			
-			for (let i = 0; i < el.childNodes.length; i++) {
-				let child = el.childNodes[i];
-
-				// we don't care about non-empty text nodes; they shouldn't be here
-				if ( child.nodetype === 8 || child.nodeType === 3 ) {
-					el.removeChild(child);
-					i--;
-				}
-			}
-
-			return {
-				pre : preLink,
-				post: postLink
-			}
-		}
 
 
 		/**
-		 * @name		preLink
-		 * @desc		directive pre-link function.Unused
-		 * 
-		 * @param  {Scope} scope
-		 * @param  {Element} iElem
-		 * @return {Void}
-		 */
-		function preLink(scope, iElem) { }
-
-
-		/**
-		 * @name	postLink
+		 * @name	playingSquareLink
 		 * @desc	Directive post-link function
+		 * 
 		 * @param  {Scope} scope
 		 * @param  {Element} element
 		 * @return {Void}
 		 */
-		function postLink(scope, element, attrs, controller) {
+		function playingSquareLink(scope, element, attrs, controller) {
 			var el = element[0];
 
 			el.droppable = true;
@@ -147,7 +113,7 @@
 			 * @return {Boolean}   false
 			 */
 			function drop(evt) {
-				let thisMove  = {};
+				let moveTaken = {};
 				let data      = getDataTransfer(evt);
 				let gamePiece = $document[0].querySelectorAll(`#${data.pieceId}`).item(0);
 
@@ -156,43 +122,26 @@
 
 				// data.moves holds all possible moves for the piece. 
 				// Extract the one for this square.
-				thisMove = data.moves.filter(m => {
+				moveTaken = data.moves.filter(m => {
 					return m.destination == evt.target.id;
 				})[0];
 
-				if (thisMove) {
+				if (moveTaken) {
 				
 					evt.dataTransfer.dropEffect = "move";
 					this.classList.remove("over");
 
-					// // move the DOM element
-					// gamePiece.parentNode.removeChild(gamePiece);
-					// this.appendChild(gamePiece);
-
-					scope.update()(data.sourceId, thisMove.destination);
+					scope.move()(data.sourceId, moveTaken.destination);
 
 
-					// if a piece was jumped, handle that.
-					if ( thisMove.jumped ) {
-						let JumpedPiece = controller.getPieceOnSquare(thisMove.jumped);
-
-						scope.update()(thisMove.jumped);
-
-						// report upwards
-						//scope.$emit('gamePiece.jumped', {square: jumpedSquare.id, piece: JumpedPiece.id});
+					// If a piece was jumped, handle that
+					if ( moveTaken.jumped ) {
+						scope.capture()(moveTaken.jumped);
 					}
 
-
-
-
-
-
-
-
-
 					// is now king?
-					if ( gamePositionService.isKingsRow(el.id) ) {
-						gamePiece.classList.add("king");										// FIXME: move to gamePiece directive?
+					if ( gamePositionService.isInCrownHead(el.id) ) {
+						scope.king()(el.id);										// FIXME: feels weird being here
 					}
 				}
 				
@@ -242,13 +191,15 @@
 
 		/**
 		 * @name		getMoves
-		 * @desc		Test whether a piece has a legal move from
+		 * @desc		tests whether a piece has a legal move from
 		 *        	starting square
 		 * 
-		 * @param  {String}		id        starting square element.id
-		 * @param  {String}		colour		white or black
-		 * @param  {Int}  		direction 1: left to right; -1: right to left; 0: any direction
-		 * @return {Array}							Objects holding IDs of possible squares, with possible jumps
+		 * @param		string  id        starting square element.id
+		 * @param		string		colour		white or black
+		 * @param		int  		direction	1: black's initial direction;
+		 *                          	-1: white's initial direction;
+		 *                          	0: any direction
+		 * @return	array							objects holding IDs of possible squares, with possible jumps
 		 */
 		function getMoves(id, colour, direction) {
 			var moves             = [];
@@ -268,7 +219,7 @@
 					directionsToCheck = ["n", "s"];
 			}
 
-			// neighbour position keys are relative: ltru, ltrd, rtlu, rtld
+			// neighbour position keys are relative: ne, nw, se, sw; white faces "north"
 			["e", "w"].forEach(h => {
 
 				directionsToCheck.forEach(v => {
@@ -299,12 +250,13 @@
 		}
 
 
+
 		/**
 		 * @name		isEmptySquare
-		 * @desc		Check whether a square is empty
+		 * @desc		checks whether a square is empty
 		 * 
-		 * @param  {String}  id	The square's element.id
-		 * @return {Boolean}
+		 * @param		string  id			the square's element.id
+		 * @return	boolean					is, or is not
 		 */
 		function isEmptySquare(id) {
 			let gamePiece = getPieceOnSquare(id);
@@ -313,34 +265,38 @@
 		}
 
 
+
 		/**
 		 * @name		isOpponent
-		 * @desc		Check whether the piece occupying a given
+		 * @desc		checks whether the piece occupying a given
 		 *        	square belongs to the opponnent.
 		 *        	
-		 * @param  {String}  id	The square's element.id
-		 * @param  {String}  colour The colour of the MOVING piece
-		 * @return {Boolean}
+		 * @param		string  id			the square's element.id
+		 * @param		string  colour	the colour of the MOVING piece
+		 * @return	boolean					is, or is not
 		 */
 		function isOpponent(id, colour) {
-			try {
-				let gamePiece = getPieceOnSquare(id);
+			let gamePiece = getPieceOnSquare(id);
 
-				if (gamePiece) {
-					return !gamePiece.classList.contains(colour);
-				}
-
-				return false;
-				
-			} catch (e) {
-				console.log(e.message);
+			if (gamePiece) {
+				return !gamePiece.classList.contains(colour);
 			}
+
+			return false;
 		}
 
 
-		function getPieceOnSquare(id) {
-			let el        = $document[0].querySelectorAll(`#${id}`).item(0);
-			let gamePiece = el.querySelectorAll(".game-piece").item(0);
+
+		/**
+		 * @name		getPieceOnSquare
+		 * @desc		gets the game-piece element occupying a given square
+		 * 
+		 * @param		string sqId square id
+		 * @return	mixed				DOM element or false if square empty
+		 */
+		function getPieceOnSquare(sqId) {
+			let el        = $document[0].querySelector(`#${sqId}`);
+			let gamePiece = el.querySelector(".game-piece");
 
 			if (gamePiece) {
 				return gamePiece;

@@ -21,9 +21,17 @@
 		});
 
 
-		$scope.update = function(fromSqId, toSqId) {
-			console.log("calling update");
-			gameDataService.update(fromSqId, toSqId);
+		$scope.move = function(fromSqId, toSqId) {
+			gameDataService.move(fromSqId, toSqId);
+		}
+
+
+		$scope.capture = function(fromSqId, toSqId) {
+			gameDataService.remove(fromSqId, toSqId);
+		}
+
+		$scope.king = function(sqId) {
+			gameDataService.king(sqId);
 		}
 	}
 }());

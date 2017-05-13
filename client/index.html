@@ -15,88 +15,10 @@
 			<playing-square ng-repeat="piece in gamePieceData track by $index"
 				data-sq-id="{{ $index + 1 }}"
 				data-piece="piece"
-				data-update="update"></playing-square>
+				data-move="move"
+				data-capture="capture"
+				data-king="king"></playing-square>
 
-			<!--playing-square id="sq1" droppable="true">
-				<game-piece class="white king" data-dir="1" draggable="true" id="w1"></game-piece>
-			</playing-square>
-			<playing-square id="sq2" droppable="true">
-				<game-piece class="white" data-dir="1" draggable="true" id="w9"></game-piece>
-			</playing-square>
-			<playing-square id="sq3" droppable="true"></playing-square>
-			<playing-square id="sq4" droppable="true">
-				<game-piece class="black king" data-dir="-1" draggable="true" id="b8"></game-piece>
-			</playing-square>
-			<playing-square id="sq5" droppable="true">
-				<game-piece class="white" data-dir="1" draggable="true" id="w5"></game-piece>
-			</playing-square>
-			<playing-square id="sq6" droppable="true"></playing-square>
-			<playing-square id="sq7" droppable="true">
-				<game-piece class="black" data-dir="-1" draggable="true" id="b12"></game-piece>
-			</playing-square>
-			<playing-square id="sq8" droppable="true">
-				<game-piece class="black" data-dir="-1" draggable="true" id="b4"></game-piece>
-			</playing-square>
-			<playing-square id="sq9" droppable="true">
-				<game-piece class="white" data-dir="1" draggable="true" id="w2"></game-piece>
-			</playing-square>
-			<playing-square id="sq10" droppable="true">
-				<game-piece class="white" data-dir="1" draggable="true" id="w10"></game-piece>
-			</playing-square>
-			<playing-square id="sq11" droppable="true"></playing-square>
-			<playing-square id="sq12" droppable="true">
-				<game-piece class="black" data-dir="-1" draggable="true" id="b7"></game-piece>
-			</playing-square>
-			<playing-square id="sq13" droppable="true">
-				<game-piece class="white" data-dir="1" draggable="true" id="w6"></game-piece>
-			</playing-square>
-			<playing-square id="sq14" droppable="true"></playing-square>
-			<playing-square id="sq15" droppable="true">
-				<game-piece class="black" data-dir="-1" draggable="true" id="b11"></game-piece>
-			</playing-square>
-			<playing-square id="sq16" droppable="true">
-				<game-piece class="black" data-dir="-1" draggable="true" id="b3"></game-piece>
-			</playing-square>
-			<playing-square id="sq17" droppable="true">
-				<game-piece class="white" data-dir="1" draggable="true" id="w3"></game-piece>
-			</playing-square>
-			<playing-square id="sq18" droppable="true">
-				<game-piece class="white" data-dir="1" draggable="true" id="w11"></game-piece>
-			</playing-square>
-			<playing-square id="sq19" droppable="true"></playing-square>
-			<playing-square id="sq20" droppable="true">
-				<game-piece class="black" data-dir="-1" draggable="true" id="b6"></game-piece>
-			</playing-square>
-			<playing-square id="sq21" droppable="true">
-				<game-piece class="white" data-dir="1" draggable="true" id="w7"></game-piece>
-			</playing-square>
-			<playing-square id="sq22" droppable="true"></playing-square>
-			<playing-square id="sq23" droppable="true">
-				<game-piece class="black" data-dir="-1" draggable="true" id="b10"></game-piece>
-			</playing-square>
-			<playing-square id="sq24" droppable="true">
-				<game-piece class="black" data-dir="-1" draggable="true" id="b2"></game-piece>
-			</playing-square>
-			<playing-square id="sq25" droppable="true">
-				<game-piece class="white" data-dir="1" draggable="true" id="w4"></game-piece>
-			</playing-square>
-			<playing-square id="sq26" droppable="true">
-				<game-piece class="white" data-dir="1" draggable="true" id="w12"></game-piece>
-			</playing-square>
-			<playing-square id="sq27" droppable="true"></playing-square>
-			<playing-square id="sq28" droppable="true">
-				<game-piece class="black" data-dir="-1" draggable="true" id="b5"></game-piece>
-			</playing-square>
-			<playing-square id="sq29" droppable="true">
-				<game-piece class="white" data-dir="1" draggable="true" id="w8"></game-piece>
-			</playing-square>
-			<playing-square id="sq30" droppable="true"></playing-square>
-			<playing-square id="sq31" droppable="true">
-				<game-piece class="black" data-dir="-1" draggable="true" id="b9"></game-piece>
-			</playing-square>
-			<playing-square id="sq32" droppable="true">
-				<game-piece class="black" data-dir="-1" draggable="true" id="b1"></game-piece>
-			</playing-square-->
 		</game-board>
 	</div>
 

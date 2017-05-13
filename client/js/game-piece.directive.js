@@ -8,6 +8,7 @@
 	function gamePiece($document, gamePositionService) {
 
 		var template = `<div 	class="game-piece {{ piece.color }}"
+													ng-class="{'king': piece.king}"
 													data-dir="{{ piece.direction }}"
 													data-piece-id="{{ piece.id }}"
 													draggable="true"></div>`;
@@ -88,9 +89,9 @@
 					gamePieceId: el.id,
 					sourceId   : parentId
 				};
-console.log(parentId, colour, direction);
+
 				moves = sqCtrl.getMoves(parentId, colour, direction);
-console.log(moves);
+
 				// is any move allowed from here?
 				if ( !moves.length ) {
 

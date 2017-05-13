@@ -7,40 +7,40 @@
 
 	function gamePositionService($document, $window) {
 
-		var squares   = [];
 		var positions = [];
+
 		var service   = {
-			getPosition           : getPosition,
-			getNeighbours         : getNeighbours,
-			getNeighboursFromId   : getNeighboursFromId,
-			getNeighbourIdOpposite: getNeighbourIdOpposite,
-			getNeighbourIdAt      : getNeighbourIdAt,
-			isKingsRow            : isKingsRow
+			getPosition             : getPosition,
+			getNeighbours           : getNeighbours,
+			getNeighboursFromId     : getNeighboursFromId,
+			getNeighbourIdOpposite  : getNeighbourIdOpposite,
+			getNeighbourIdAtPosition: getNeighbourIdAtPosition,
+			isInCrownHead           : isInCrownHead
 		};
 
-		// directives don't exist yet
-		//init();
+		// directives don't exist yet!
+		// _init();
 
 		return service;
 
 
 		/**
-		 * @name	init
+		 * @name	_init
 		 * @desc	collect positions of all squares
-		 * 
-		 * @todo	Handle window resize!
 		 * 
 		 * @return {Array}
 		 */
-		function init() {
-			squares = $document[0].querySelectorAll(".playing-square");
+		function _init() {
+
+			let squares = $document[0].querySelectorAll(".playing-square");
+
 			squares.forEach(sq => {
 				let domRect = sq.getBoundingClientRect();
 				let pos     = {};
 
 				// The updated CSS for the square sizes uses percent to several
-				// decimal places to allow for proportional game board.
-				// But this causes the DOMRect to similarly use high-precision,
+				// decimal places to allow for a proportional game board.
+				// But this causes the DOMRect to similarly use high precision,
 				// which means that the corner positions of adjoining squares
 				// no longer match without rounding.
 				// 
@@ -53,8 +53,9 @@
 				positions.push({ id: sq.id, pos: pos });
 			});
 
-			angular.element($window).bind('resize', init);
+			angular.element($window).bind('resize', _init);
 		}
+
 
 
 		/**
@@ -65,12 +66,13 @@
 		 * @return {Object}   
 		 */
 		function getPosition(id) {
-			if ( !positions.length ) init();	// hacky!
+			if ( !positions.length ) _init();	// hacky!
 
 			return positions.filter(p => {
 				return p.id == id;
 			})[0];
 		}
+
 
 
 		/**
@@ -83,7 +85,7 @@
 		 * @see https://developer.mozilla.org/en-US/docs/Mozilla/Tech/XPCOM/Reference/Interface/nsIDOMClientRect
 		 */
 		function getNeighbours(domRect, dir) {
-			if ( !positions.length ) init();	// sacky!
+			if ( !positions.length ) _init();	// sacky!
 
 			let neighbours         = [];
 			let neighboursRelative = {};
@@ -131,6 +133,7 @@
 		}
 
 
+
 		/**
 		 * @name	getNeighboursFromId
 		 * @desc	Get the neighbouring squares of one that is being moved from
@@ -154,6 +157,7 @@
 
 
 
+
 		/**
 		 * @name		getNeighbourIdOpposite
 		 * @desc		Fetch the ID for the square in line
@@ -168,31 +172,38 @@
 			let startSq          = this.getPosition(idStart);
 			let betweenSq        = this.getPosition(idBetween);
 			let destinationSides = {};
-			let oppositeKey      = "";
+			let opposing         = "";
+			let opposites        = {
+				"bottom": "top",
+				"left"  : "right",
+				"right" : "left",
+				"top"   : "bottom"
+			};
 
 			// got to be a better way
 			for (let k in startSq.pos) {
-				oppositeKey = getOpposite(k);
+				opposing = opposites[k];
 
-				if (startSq.pos[k] == betweenSq.pos[oppositeKey]) {
+				if (startSq.pos[k] == betweenSq.pos[opposing]) {
 					// Corners meet. If k is "left", destination's "right"
 					// will equal between's "left", and so on
-					destinationSides[oppositeKey] = betweenSq.pos[k];
+					destinationSides[opposing] = betweenSq.pos[k];
 				}
 			}
 
-			return this.getNeighbourIdAt(destinationSides);
+			return this.getNeighbourIdAtPosition(destinationSides);
 		}
 
 
+
 		/**
-		 * @name		getNeighbourIdAt
-		 * @desc		Fecth the ID of the square at a given position
+		 * @name		getNeighbourIdAtPosition
+		 * @desc		Fetch the ID of the square at a given position
 		 * 
-		 * @param  {Object} sides	one or more positions to check
-		 * @return {String}    the square's element.id
+		 * @param		Object sides	one or more positions to check
+		 * @return	String				the square's element.id
 		 */
-		function getNeighbourIdAt(sides) {
+		function getNeighbourIdAtPosition(sides) {
 			let neighbour;
 
 			neighbour = positions.filter(p => {
@@ -212,41 +223,19 @@
 
 
 		/**
-		 * @name	isKingsRow
-		 * @desc	Check whether square landed on is opponent's first row
+		 * @name		isInCrownHead
+		 * @desc		checks whether a square is in first row
 		 * 
-		 * @param  {String}  id square element.id
-		 * @return {Boolean}  is, or is not
+		 * @param		String  id square element.id
+		 * @return	Boolean  is, or is not
 		 */
-		function isKingsRow(id) {
+		function isInCrownHead(id) {
 			let index = parseFloat(id.substr(2));	// id is eg. sq1, sq22, etc.
-			let mod   = (index + 8) % 8;
 
-			return mod == 1 || mod == 0;
-		}
-
-
-		function getOpposite(str) {
-			let opposite = "";
-			switch (str) {
-					case "bottom":
-						opposite = "top";
-						break;
-					case "left":
-						opposite = "right";
-						break;
-					case "right":
-						opposite = "left";
-						break;
-					case "top":
-						opposite = "bottom";
-						break;
-					default:
-
-				}
-				return opposite;
+			return ( index >= 1 && index <= 4 ) || ( index >= 29 && index <= 32 );
 		}
 	}
 
 
 }());
+
