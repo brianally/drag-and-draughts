@@ -3,9 +3,9 @@
 
 	angular
 		.module("draughts")
-		.directive("gamePiece", ["$document", "gamePositionService", gamePiece]);
+		.directive("gamePiece", ["$document", "gamePositionService", "dataTransferService", gamePiece]);
 
-	function gamePiece($document, gamePositionService) {
+	function gamePiece($document, gamePositionService, dataTransferService) {
 
 		var template = `<div 	class="game-piece {{ piece.color }}"
 													ng-class="{'king': piece.king}"
@@ -77,20 +77,19 @@
 			 * @return {Boolean}   false
 			 */
 			function dragStart(evt) {
-				let sourceSquare, data, colour, direction;
-				let sqCtrl   = controllers[1];
-				let parentId = el.parentNode.id;
-				let moves    = [];
 
-				sourceSquare = $document[0].querySelectorAll(`#${parentId}`);
-				colour       = el.classList.contains("white") ? "white" : "black";
-				direction    = el.classList.contains("king") ? 0 : parseInt(el.dataset.dir);
-				data         = {
+				let sqId      = el.parentNode.id;
+				let moves     = [];
+				let colour    = el.classList.contains("white") ? "white" : "black";
+				let direction = el.classList.contains("king") ? 0 : parseInt(el.dataset.dir);
+				let data      = {
 					gamePieceId: el.id,
-					sourceId   : parentId
+					sourceId   : sqId
 				};
 
-				moves = sqCtrl.getMoves(parentId, colour, direction);
+				// get all moves from this position
+				moves = gamePositionService.getMoves(sqId, colour, direction);
+
 
 				// is any move allowed from here?
 				if ( !moves.length ) {
@@ -105,12 +104,13 @@
 				// store possible moves, including jumps
 				data.moves = moves;
 
-				evt.dataTransfer.effectAllowed = "move";
-				evt.dataTransfer.setData("text/plain", JSON.stringify(data));
-
+				dataTransferService.setAllowedEffect(evt, "move");
+				dataTransferService.setData(evt, data);
+				
 				this.classList.add("dragging");
 				return false;
 			}
+
 
 
 			/**
