@@ -12,12 +12,14 @@
 		var subscribers = {};
 
 		var service     = {
-			initData : initData,
-			getData  : getData,
-			subscribe: subscribe,
-			move     : move,
-			remove   : remove,
-			king     : king
+			initData  : initData,
+			getData   : getData,
+			subscribe : subscribe,
+			move      : move,
+			remove    : remove,
+			crown     : crown,
+			isEmpty   : isEmpty,
+			isOpponent: isOpponent
 		};
 
 
@@ -100,7 +102,14 @@
 		}
 
 
-		function king(sqId) {
+		/**
+		 * @name		crown
+		 * @desc		makes a given game piece a king
+		 * 
+		 * @param  String		sqId	the ID of the square the piece is occupying
+		 * @return void
+		 */
+		function crown(sqId) {
 			let index = _indexFromId(sqId);
 			let piece = data[index];
 
@@ -110,6 +119,41 @@
 
 				_notifySubscribers();
 			}
+		}
+
+
+		/**
+		 * @name		isEmpty
+		 * @desc		checks whether a position is occupied
+		 * 
+		 * @param  String		sqId	square element.id
+		 * @return Boolean				is, or is not
+		 */
+		function isEmpty(sqId) {
+			let index = _indexFromId(sqId);
+
+			return data[index] === undefined;
+		}
+
+
+		/**
+		 * @name		isOpponent
+		 * @desc		checks whether the piece occupying a given
+		 *        	position belongs to the opponnent.
+		 *        	
+		 * @param		string  id			the square's element.id
+		 * @param		string  shade		the shade of the moving piece: black or white
+		 * @return	boolean					is, or is not - or undefined
+		 */
+		function isOpponent(sqId, shade) {
+			let index = _indexFromId(sqId);
+			let piece = data[index];
+
+			if (piece) {
+				return piece.shade !== shade;
+			}
+
+			return undefined;
 		}
 
 
@@ -163,17 +207,17 @@
 		 * @desc		adds the game-pieces to the data
 		 * 
 		 * @param  int			numPieces
-		 * @param  string		color
+		 * @param  string		shade
 		 * @return array
 		 */
-		function _populatePieces(numPieces, color) {
+		function _populatePieces(numPieces, shade) {
 
 			let arr = Array.apply(null, Array(numPieces)).map(function (el, idx) {
 				let oneBasedIndex = idx + 1;
 				return {
-					id   : `${color}${oneBasedIndex}`,
-					color: color,
-					direction: color == "white" ? -1 : 1		// hacky
+					id   : `${shade}${oneBasedIndex}`,
+					shade: shade,
+					direction: shade == "white" ? -1 : 1		// hacky
 				};
 			});
 

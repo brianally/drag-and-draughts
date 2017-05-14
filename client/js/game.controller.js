@@ -30,8 +30,8 @@
 			gameDataService.remove(fromSqId, toSqId);
 		}
 
-		$scope.king = function(sqId) {
-			gameDataService.king(sqId);
+		$scope.makeKing = function(sqId) {
+			gameDataService.crown(sqId);
 		}
 	}
 }());

@@ -3,9 +3,9 @@
 
 	angular
 		.module("draughts")
-		.factory("gamePositionService", ["$document", "$window", gamePositionService]);
+		.factory("gamePositionService", ["$document", "$window", "gameDataService", gamePositionService]);
 
-	function gamePositionService($document, $window) {
+	function gamePositionService($document, $window, gameDataService) {
 
 		var positions = [];
 
@@ -14,11 +14,8 @@
 			getMoves                : getMoves,
 			getNeighbours           : getNeighbours,
 			getNeighboursFromId     : getNeighboursFromId,
-			getNeighbourIdOpposite  : getNeighbourIdOpposite,
+			getNextNeighbourId      : getNextNeighbourId,
 			getNeighbourIdAtPosition: getNeighbourIdAtPosition,
-			getPieceOnSquare        : getPieceOnSquare,
-			isOpponent              : isOpponent,
-			isEmptySquare           : isEmptySquare,
 			isInCrownHead           : isInCrownHead
 		};
 
@@ -30,7 +27,7 @@
 
 		/**
 		 * @name	_init
-		 * @desc	collect positions of all squares
+		 * @desc	collects positions of all squares
 		 * 
 		 * @return {Array}
 		 */
@@ -64,7 +61,7 @@
 
 		/**
 		 * @name		getPosition
-		 * @desc		text() the position object for a given square
+		 * @desc		gets the position object for a given square
 		 * 
 		 * @param  {String} id		the square element.id
 		 * @return {Object}   
@@ -84,14 +81,14 @@
 		 * @desc		tests whether a piece has a legal move from
 		 *        	starting square
 		 * 
-		 * @param		string  id        starting square element.id
-		 * @param		string		colour		white or black
-		 * @param		int  		direction	1: black's initial direction;
+		 * @param		String  id        starting square element.id
+		 * @param		String	shade			white or black
+		 * @param		Int  		direction	1: black's initial direction;
 		 *                          	-1: white's initial direction;
 		 *                          	0: any direction
 		 * @return	array							objects holding IDs of possible squares, with possible jumps
 		 */
-		function getMoves(id, colour, direction) {
+		function getMoves(id, shade, direction) {
 			var moves             = [];
 			var directionsToCheck = [];
 			let neighbours        = this.getNeighboursFromId(id, direction);
@@ -118,16 +115,17 @@
 
 					// if starting square is along edge neighbour[key] may not exist
 					if (sq) {
-						if ( this.isEmptySquare(sq.id) ) {
+
+						if ( gameDataService.isEmpty(sq.id) ) {
 							moves.push({ destination: sq.id });
 						}
-						else if ( this.isOpponent(sq.id, colour) ) {
+						else if ( gameDataService.isOpponent(sq.id, shade) ) {
 							// can opponent be jumped?
-							let jumpSqId = this.getNeighbourIdOpposite(id, sq.id);
+							let jumpSqId = this.getNextNeighbourId(id, sq.id);
 
 							if (jumpSqId != null) {	// possible if edge of game board
 
-								if ( this.isEmptySquare(jumpSqId) ) {
+								if ( gameDataService.isEmpty(jumpSqId) ) {
 									moves.push({ destination: jumpSqId, jumped: sq.id });
 								}
 							}
@@ -144,52 +142,53 @@
 		 * @name	getNeighbours
 		 * @desc	Get the neighbouring squares of one that is being moved from
 		 * 
-		 * @param	{DOMRect} domRect  the source square's positions
-		 * @param	{Int}			dir direction of travel: l->r: 1; r->l: -1; king: 0
-		 * @return {Array}  objects with neighbour IDs and positions
+		 * @param		DOMRect source  the source square's positions
+		 * @param		Int			dir			direction of travel: l->r: 1; r->l: -1; king: 0
+		 * @return	Array  				objects with neighbour IDs and positions
 		 * @see https://developer.mozilla.org/en-US/docs/Mozilla/Tech/XPCOM/Reference/Interface/nsIDOMClientRect
 		 */
-		function getNeighbours(domRect, dir) {
+		function getNeighbours(source, dir) {
 			if ( !positions.length ) _init();	// sacky!
 
 			let neighbours         = [];
 			let neighboursRelative = {};
 
-			neighbours = positions.filter(sq => {
-				return ( sq.pos.right == domRect.left && sq.pos.bottom == domRect.top )
-					||	( sq.pos.left == domRect.right && sq.pos.bottom == domRect.top )
-					|| 	( sq.pos.left == domRect.right && sq.pos.top == domRect.bottom )
-					||	( sq.pos.right == domRect.left && sq.pos.top == domRect.bottom );
+			// filter for immediate neighbours
+			neighbours = positions.filter(dest => {
+				return ( dest.pos.right == source.left && dest.pos.bottom == source.top )
+					||	( dest.pos.left == source.right && dest.pos.bottom == source.top )
+					|| 	( dest.pos.left == source.right && dest.pos.top == source.bottom )
+					||	( dest.pos.right == source.left && dest.pos.top == source.bottom );
 			});
 
-// return all for now
-			// king moves any direction
-			// if (dir !== 0) {
-			// 	neighbours = neighbours.filter(sq => {
-			// 		return dir > 0
-			// 			? sq.pos.right > domRect.right
-			// 			: sq.pos.left < domRect.left;
-			// 	});
-			// }
+
+			// filter for direction unless king
+			if (dir !== 0) {
+				neighbours = neighbours.filter(dest => {
+					return dir > 0
+						? dest.pos.top > source.top
+						: dest.pos.top < source.top;
+				});
+			}
 
 
 			// reiterate to give relative directions
-			neighbours.forEach(sq => {
-				if ( sq.pos.right == domRect.left && sq.pos.bottom == domRect.top ) {
+			neighbours.forEach(dest => {
+				if ( dest.pos.right == source.left && dest.pos.bottom == source.top ) {
 
-					neighboursRelative.nw = sq;
+					neighboursRelative.nw = dest;
 
-				} else if ( sq.pos.left == domRect.right && sq.pos.bottom == domRect.top ) {
+				} else if ( dest.pos.left == source.right && dest.pos.bottom == source.top ) {
 
-					neighboursRelative.ne = sq;
+					neighboursRelative.ne = dest;
 
-				} else if ( sq.pos.left == domRect.right && sq.pos.top == domRect.bottom ) {
+				} else if ( dest.pos.left == source.right && dest.pos.top == source.bottom ) {
 
-					neighboursRelative.se = sq;
+					neighboursRelative.se = dest;
 
 				} else {
 
-					neighboursRelative.sw = sq;
+					neighboursRelative.sw = dest;
 
 				}
 			});
@@ -201,11 +200,11 @@
 
 		/**
 		 * @name	getNeighboursFromId
-		 * @desc	Get the neighbouring squares of one that is being moved from
+		 * @desc	gets the neighbouring squares of one that is being moved from
 		 * 
-		 * @param  {String}		id  the source element.id
-		 * @param  {Int}		dir direction of travel: l->r: 1; r->l: -1; king: 0
-		 * @return {Array}  objects with neighbour IDs and positions
+		 * @param  String		id  the source element.id
+		 * @param  Int			dir direction of travel: l->r: 1; r->l: -1; king: 0
+		 * @return Array  			objects with neighbour IDs and positions
 		 */
 		function getNeighboursFromId(id, dir) {
 			let sq      = $document[0].querySelector(`#${id}`);
@@ -224,15 +223,15 @@
 
 
 		/**
-		 * @name		getNeighbourIdOpposite
-		 * @desc		Fetch the ID for the square in line
+		 * @name		getNextNeighbourId
+		 * @desc		fetches the ID for the next square in line
 		 * 					with starting square and between square
 		 * 					
-		 * @param  {String} idStart   element.id
-		 * @param  {String} idBetween element.id
-		 * @return {String}           element.id or null
+		 * @param  String idStart   element.id
+		 * @param  String idBetween element.id
+		 * @return String           element.id or null
 		 */
-		function getNeighbourIdOpposite(idStart, idBetween) {
+		function getNextNeighbourId(idStart, idBetween) {
 
 			let startSq          = this.getPosition(idStart);
 			let betweenSq        = this.getPosition(idBetween);
@@ -263,15 +262,14 @@
 
 		/**
 		 * @name		getNeighbourIdAtPosition
-		 * @desc		Fetch the ID of the square at a given position
+		 * @desc		fetches the ID of the square at a given position
 		 * 
 		 * @param		Object sides	one or more positions to check
 		 * @return	String				the square's element.id
 		 */
 		function getNeighbourIdAtPosition(sides) {
-			let neighbour;
 
-			neighbour = positions.filter(p => {
+			let neighbour = positions.filter(p => {
 				for (let s in sides) {
 					if (p.pos[s] !== sides[s]) return false;
 				}
@@ -283,59 +281,6 @@
 			}
 
 			return null;
-		}
-
-
-
-		/**
-		 * @name		getPieceOnSquare
-		 * @desc		gets the game-piece element occupying a given square
-		 * 
-		 * @param		string sqId square id
-		 * @return	mixed				DOM element or false if square empty
-		 */
-		function getPieceOnSquare(sqId) {
-			let el        = $document[0].querySelector(`#${sqId}`);
-			let gamePiece = el.querySelector(".game-piece");
-
-			if (gamePiece) {
-				return gamePiece;
-			}
-			return false;
-		}
-
-
-		/**
-		 * @name		isEmptySquare
-		 * @desc		checks whether a square is empty
-		 * 
-		 * @param		string  id			the square's element.id
-		 * @return	boolean					is, or is not
-		 */
-		function isEmptySquare(id) {
-			let gamePiece = this.getPieceOnSquare(id);
-
-			return gamePiece === false;
-		}
-
-
-		/**
-		 * @name		isOpponent
-		 * @desc		checks whether the piece occupying a given
-		 *        	square belongs to the opponnent.
-		 *        	
-		 * @param		string  id			the square's element.id
-		 * @param		string  colour	the colour of the MOVING piece
-		 * @return	boolean					is, or is not
-		 */
-		function isOpponent(id, colour) {
-			let gamePiece = this.getPieceOnSquare(id);
-
-			if (gamePiece) {
-				return !gamePiece.classList.contains(colour);
-			}
-
-			return false;
 		}
 
 

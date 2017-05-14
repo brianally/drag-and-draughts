@@ -20,11 +20,11 @@
 			restrict    : "E",
 			controllerAs: "vm",
 			scope: {
-				sqId   : "@",
-				piece  : "=",
-				move   : "&",
-				capture: "&",
-				king   : "&"
+				sqId    : "@",
+				piece   : "=",
+				move    : "&",
+				capture : "&",
+				makeKing: "&"
 			},
 			replace   : true,
 			template  : template,
@@ -162,7 +162,7 @@
 
 					// is now king?
 					if ( gamePositionService.isInCrownHead(el.id) ) {
-						scope.king()(el.id);										// FIXME: feels weird being here
+						scope.makeKing()(el.id);										// FIXME: feels weird being here
 					}
 				}
 				

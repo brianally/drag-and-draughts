@@ -7,7 +7,7 @@
 
 	function gamePiece($document, gamePositionService, dataTransferService) {
 
-		var template = `<div 	class="game-piece {{ piece.color }}"
+		var template = `<div 	class="game-piece {{ piece.shade }}"
 													ng-class="{'king': piece.king}"
 													data-dir="{{ piece.direction }}"
 													data-piece-id="{{ piece.id }}"
@@ -66,7 +66,7 @@
 
 				let sqId      = el.parentNode.id;
 				let moves     = [];
-				let colour    = el.classList.contains("white") ? "white" : "black";
+				let shade     = el.classList.contains("white") ? "white" : "black";
 				let direction = el.classList.contains("king") ? 0 : parseInt(el.dataset.dir);
 				let data      = {
 					gamePieceId: el.id,
@@ -74,7 +74,7 @@
 				};
 
 				// get all moves from this position
-				moves = gamePositionService.getMoves(sqId, colour, direction);
+				moves = gamePositionService.getMoves(sqId, shade, direction);
 
 
 				// is any move allowed from here?
