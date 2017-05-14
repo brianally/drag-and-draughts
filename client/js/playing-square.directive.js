@@ -12,7 +12,7 @@
 													id="sq{{ sqId }}"
 													droppable="true">
 											<game-piece	ng-if="!!piece"
-												piece="piece"></game-piece>
+												data-piece="piece"></game-piece>
 										</div>`;
 
 
@@ -57,13 +57,34 @@
 			el.addEventListener("drop", drop, false);
 
 			["dragleave", "dragend", "dragexit"].forEach(eventName => {
-				el.addEventListener(eventName, function(evt) {
-					this.classList.remove("over");
-					this.classList.remove("warn");
-					return false;
-				}, false);
+				el.addEventListener(eventName, leaveEndExit, false);
 			});
 
+			scope.$on("$destroy", function() {
+
+				el.removeEventListener("dragenter", dragenter, false);
+				el.removeEventListener("dragover", dragover, false);
+				el.removeEventListener("drop", drop, false);
+
+				["dragleave", "dragend", "dragexit"].forEach(eventName => {
+					el.removeEventListener(eventName, leaveEndExit, false);
+				});
+			});
+
+
+			/**
+			 * @name		leaveEndExit
+			 * @desc		removes css classes
+			 *        	
+			 * @param  {Event} evt "dragleave", "dragend", or "dragexit"
+			 * @return {Boolean}   false
+			 */
+			function leaveEndExit(evt) {
+				this.classList.remove("over");
+				this.classList.remove("warn");
+				return false;
+			}
+			
 
 			/**
 			 * @name		dragEnter
@@ -128,7 +149,7 @@
 
 				if (moveTaken) {
 				
-					evt.dataTransfer.dropEffect = "move";															// ***********************
+					//evt.dataTransfer.dropEffect = "move";															// ***********************
 					this.classList.remove("over");
 
 					scope.move()(data.sourceId, moveTaken.destination);

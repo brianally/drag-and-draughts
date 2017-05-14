@@ -43,8 +43,5 @@
 	function GameBoardController($scope) {
 		var vm = this;
 
-		$scope.$on("playingSquare.jumped", function(event, data) {
-			$scope.$broadcast("gamePiece.jumped", data);
-		});
 	}
 }());

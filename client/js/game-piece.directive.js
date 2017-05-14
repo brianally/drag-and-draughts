@@ -48,25 +48,11 @@
 			el.addEventListener("dragstart", dragStart, false);
 			el.addEventListener("dragend", dragEnd, false);
 
-			// This destroys ALL gamePiece scopes!
-			// scope.$on("$destroy", function(event, data) {
-			// 	el.removeEventListener("dragstart", dragStart, false);
-			// 	el.removeEventListener("dragend", dragEnd, false);
-			// 	console.log(`destroyed: ${el.id}`);
-			// });
+			scope.$on("$destroy", function() {
 
+				el.removeEventListener("dragstart", dragStart, false);
+				el.removeEventListener("dragend", dragEnd, false);
 
-			scope.$on("gamePiece.jumped", function(event, data) {
-
-				if (data.piece == el.id) {
-					scope.$destroy();
-					scope = null;
-					
-					el.removeEventListener("dragstart", dragStart, false);
-					el.removeEventListener("dragend", dragEnd, false);
-					
-					el.parentNode.removeChild(el);
-				}
 			});
 			
 
@@ -125,6 +111,7 @@
 			}
 		}
 	}
+
 
 	GamePieceController.$inject = ["$scope"];
 
