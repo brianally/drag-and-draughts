@@ -39,7 +39,7 @@
 				let domRect = sq.getBoundingClientRect();
 				let pos     = {};
 
-				// The updated CSS for the square sizes uses percent to several
+				// The CSS for the square sizes uses percent to several
 				// decimal places to allow for a proportional game board.
 				// But this causes the DOMRect to similarly use high precision,
 				// which means that the corner positions of adjoining squares
