@@ -8,7 +8,7 @@
 	function gamePiece($document, gamePositionService, dataTransferService) {
 
 		var template = `<div 	class="game-piece {{ piece.shade }}"
-													ng-class="{'king': piece.king}"
+													ng-class="{'king': piece.king, 'disabled': piece.shade !== inPlay}"
 													data-dir="{{ piece.direction }}"
 													data-piece-id="{{ piece.id }}"
 													draggable="true"></div>`;
@@ -17,7 +17,8 @@
 			restrict    : "E",
 			controllerAs: "vm",
 			scope: {
-				piece: "="
+				piece   : "=",
+				inPlay  : "@"
 			},
 			replace   : true,
 			template  : template,
@@ -41,7 +42,6 @@
 			var el = element[0];
 
 			el.draggable = true;
-			el.dataset.king = false;
 
 			el.addEventListener("dragstart", dragStart, false);
 			el.addEventListener("dragend", dragEnd, false);
@@ -61,6 +61,11 @@
 			 * @return {Boolean}   false
 			 */
 			function dragStart(evt) {
+
+				if ( !el.classList.contains( scope.inPlay ) || scope.mustJump ) {
+					evt.preventDefault();
+					return false;
+				}
 
 				let sqId      = el.parentNode.id;
 				let moves     = [];
@@ -104,7 +109,7 @@
 			 */
 			function dragEnd(evt) {
 				this.classList.remove("dragging");
-				return false;			
+				return false;
 			}
 		}
 	}

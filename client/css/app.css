@@ -69,6 +69,10 @@ game-board {
 	box-shadow: 3px 2px 4px #555;
 }
 
+.game-piece.disabled {
+	cursor: not-allowed;
+}
+
 .black {
 	background-color: #999;
 	color           : #FFF;
@@ -87,8 +91,6 @@ game-board {
 	background-repeat  : no-repeat;
 	background-size    : contain;
 }
-
-
 
 .dragging {
 	opacity: 0.7;

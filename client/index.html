@@ -15,9 +15,11 @@
 			<playing-square ng-repeat="piece in gamePieceData track by $index"
 				data-sq-id="{{ $index + 1 }}"
 				data-piece="piece"
+				data-in-play="{{ inPlay }}"
 				data-move="move"
 				data-capture="capture"
-				data-make-king="makeKing"></playing-square>
+				data-make-king="makeKing"
+				data-dropped="dropped"></playing-square>
 
 		</game-board>
 	</div>

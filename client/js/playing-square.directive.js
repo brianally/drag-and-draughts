@@ -12,7 +12,8 @@
 													id="sq{{ sqId }}"
 													droppable="true">
 											<game-piece	ng-if="!!piece"
-												data-piece="piece"></game-piece>
+												data-piece="piece"
+												data-in-play="{{ inPlay }}"></game-piece>
 										</div>`;
 
 
@@ -22,9 +23,11 @@
 			scope: {
 				sqId    : "@",
 				piece   : "=",
+				inPlay  : "@",
 				move    : "&",
 				capture : "&",
-				makeKing: "&"
+				makeKing: "&",
+				dropped : "&"
 			},
 			replace   : true,
 			template  : template,
@@ -153,7 +156,7 @@
 					//evt.dataTransfer.dropEffect = "move";															// ***********************
 					this.classList.remove("over");
 
-					scope.move()(data.sourceId, moveTaken.destination);
+					scope.move()( data.sourceId, moveTaken.destination );
 
 
 					// If a piece was jumped, handle that
@@ -165,6 +168,9 @@
 					if ( gamePositionService.isInCrownHead(el.id) ) {
 						scope.makeKing()(el.id);										// FIXME: feels weird being here
 					}
+
+					scope.dropped()( typeof moveTaken.jumped !== "undefined" );
+
 				}
 				
 				
