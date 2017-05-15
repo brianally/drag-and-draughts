@@ -16,6 +16,7 @@
 			getNeighboursFromId     : getNeighboursFromId,
 			getNextNeighbourId      : getNextNeighbourId,
 			getNeighbourIdAtPosition: getNeighbourIdAtPosition,
+			isOccupied              : isOccupied,
 			isInCrownHead           : isInCrownHead
 		};
 
@@ -284,16 +285,29 @@
 		}
 
 
+		/**
+		 * @name		isOccupied
+		 * @desc		checks whether a square is occupied
+		 * 
+		 * @param		String		sqId	square element.id
+		 * @return	Boolean					is, or is not
+		 */
+		function isOccupied(sqId) {
+			return !gameDataService.isEmpty(sqId);
+		}
+
+
+// **************************************** SHOULD MOVE TO GAME DATA SERVICE?
 
 		/**
 		 * @name		isInCrownHead
 		 * @desc		checks whether a square is in first row
 		 * 
-		 * @param		String  id square element.id
-		 * @return	Boolean  is, or is not
+		 * @param		String		sqId	square element.id
+		 * @return	Boolean					is, or is not
 		 */
-		function isInCrownHead(id) {
-			let index = parseFloat(id.substr(2));	// id is eg. sq1, sq22, etc.
+		function isInCrownHead(sqId) {
+			let index = parseFloat(sqId.substr(2));	// id is eg. sq1, sq22, etc.
 
 			return ( index >= 1 && index <= 4 ) || ( index >= 29 && index <= 32 );
 		}

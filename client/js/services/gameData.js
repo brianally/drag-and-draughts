@@ -139,7 +139,7 @@
 		/**
 		 * @name		isOpponent
 		 * @desc		checks whether the piece occupying a given
-		 *        	position belongs to the opponnent.
+		 *        	position belongs to the opponnent
 		 *        	
 		 * @param		string  id			the square's element.id
 		 * @param		string  shade		the shade of the moving piece: black or white
@@ -155,6 +155,7 @@
 
 			return undefined;
 		}
+
 
 
 		/**
@@ -188,6 +189,7 @@
 		}
 
 
+
 		/**
 		 * @name		_notifySubscribers
 		 * @desc		
@@ -204,7 +206,7 @@
 
 		/**
 		 * @name		_populatePieces
-		 * @desc		adds the game-pieces to the data
+		 * @desc		adds game-pieces to the data
 		 * 
 		 * @param  int			numPieces
 		 * @param  string		shade
@@ -215,14 +217,15 @@
 			let arr = Array.apply(null, Array(numPieces)).map(function (el, idx) {
 				let oneBasedIndex = idx + 1;
 				return {
-					id   : `${shade}${oneBasedIndex}`,
-					shade: shade,
+					id       : `${shade}${oneBasedIndex}`,
+					shade    : shade,
 					direction: shade == "white" ? -1 : 1		// hacky
 				};
 			});
 
 			return arr;
 		}
+
 
 
 		/**

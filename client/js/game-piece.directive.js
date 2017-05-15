@@ -21,7 +21,7 @@
 			},
 			replace   : true,
 			template  : template,
-			require   : ["^gamePiece", "^playingSquare"],
+			//require   : ["^gamePiece", "^playingSquare"],
 			controller: GamePieceController,
 			link      : gamePieceLink
 		}
@@ -33,13 +33,11 @@
 		 * @name		gamePieceLink
 		 * @desc		Directive post-link function
 		 * 
-		 * @param		{Scope} scope
-		 * @param		{Element} element
-		 * @param		{Object} attributes
-		 * @param		{Controller} controller
-		 * @return	{Void}
+		 * @param		Scope scope
+		 * @param		Element element
+		 * @return	Void}
 		 */
-		function gamePieceLink(scope, element, attributes, controllers) {
+		function gamePieceLink(scope, element) {
 			var el = element[0];
 
 			el.draggable = true;
@@ -80,8 +78,7 @@
 				// is any move allowed from here?
 				if ( !moves.length ) {
 
-					console.log("no moves!");
-
+					//console.log("no moves!");
 					
 					evt.preventDefault();
 					return false;

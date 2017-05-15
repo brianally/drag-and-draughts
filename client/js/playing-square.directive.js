@@ -76,12 +76,13 @@
 			 * @name		leaveEndExit
 			 * @desc		removes css classes
 			 *        	
-			 * @param  {Event} evt "dragleave", "dragend", or "dragexit"
-			 * @return {Boolean}   false
+			 * @param  Event evt "dragleave", "dragend", or "dragexit"
+			 * @return Boolean   false
 			 */
 			function leaveEndExit(evt) {
 				this.classList.remove("over");
 				this.classList.remove("warn");
+				console.log(evt.type);
 				return false;
 			}
 			
@@ -91,13 +92,13 @@
 			 * @desc		highlight entered square,
 			 *        	warn if not allowed.
 			 *        	
-			 * @param  {Event} evt "dragenter"
-			 * @return {Boolean}   false
+			 * @param  Event evt "dragenter"
+			 * @return Boolean   false
 			 */
 			function dragEnter(evt) {
 
 				// ensure not empty
-				if ( el.hasChildNodes() ) {
+				if ( gamePositionService.isOccupied(evt.target.id) ) {
 					this.classList.add("warn");
 				} else {
 					this.classList.add("over");
@@ -112,8 +113,8 @@
 			 * @name		dragOver
 			 * @desc		Set the dropEffect
 			 * 
-			 * @param  {Event} evt "dragover"
-			 * @return {Boolean}   false
+			 * @param  Event evt "dragover"
+			 * @return Boolean   false
 			 */
 			function dragOver(evt) {
 				//evt.dataTransfer.dropEffect = "move";
@@ -130,8 +131,8 @@
 			 *        	it: a) empty? b)in the correct direction?
 			 *        	If taking opponent's piece is it a valid jump?
 			 * 
-			 * @param  {Event} evt "drop"
-			 * @return {Boolean}   false
+			 * @param  Event evt "drop"
+			 * @return Boolean   false
 			 */
 			function drop(evt) {
 				let moveTaken = {};
@@ -180,7 +181,7 @@
 	/**
 	 * @name	PlayingSquareController
 	 * @desc	
-	 * @param {Scope} $scope
+	 * @param Scope $scope
 	 */
 	function PlayingSquareController($scope, $element) {
 		var vm = this;

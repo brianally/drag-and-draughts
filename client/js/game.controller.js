@@ -9,7 +9,7 @@
 	function gameCtrl($scope, gameDataService) {
 
 		// this will be passed in by select list later
-		let numSquares = 32; // black only; for a 64-sq board
+		let numSquares = 32; // dark only; for a 64-sq board
 		let numPieces  = 12; // per side
 
 		$scope.gamePieceData = gameDataService.initData(numSquares, numPieces);
@@ -29,6 +29,7 @@
 		$scope.capture = function(fromSqId, toSqId) {
 			gameDataService.remove(fromSqId, toSqId);
 		}
+		
 
 		$scope.makeKing = function(sqId) {
 			gameDataService.crown(sqId);
