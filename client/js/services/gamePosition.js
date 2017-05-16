@@ -212,12 +212,7 @@
 		function getNeighboursFromId(id, dir) {
 			let sq      = $document[0].querySelector(`#${id}`);
 			let domRect = sq.getBoundingClientRect();
-			let pos     = {};
-
-			// see comment in init()
-			for (let side in domRect) {
-				pos[side] = Math.round(domRect[side]);
-			}
+			let pos     = _roundRect(domRect);
 
 			return this.getNeighbours(pos, dir);
 		}
