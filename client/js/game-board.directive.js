@@ -19,7 +19,7 @@
 
 		/**
 		 * @name		gameBoardLink
-		 * @desc		Directive post-link function
+		 * @summary		Directive post-link function
 		 * 
 		 * @param		{Scope} scope
 		 * @param		{Element} element
@@ -37,7 +37,7 @@
 
 	/**
 	 * @name	GameBoardController
-	 * @desc	
+	 * @summary	
 	 * @param {Scope} $scope
 	 */
 	function GameBoardController($scope) {

@@ -3,9 +3,9 @@
 
 	angular
 		.module("draughts")
-		.factory("gameDataService", gameDataService);
+		.factory("gameDataService", ["$q", "GamePiece", gameDataService]);
 
-	function gameDataService($document, $window) {
+	function gameDataService($q, GamePiece) {
 
 		var data        = [];
 		var positions   = [];
@@ -14,10 +14,7 @@
 		var service     = {
 			initData  : initData,
 			getData   : getData,
-			subscribe : subscribe,
-			move      : move,
-			remove    : remove,
-			crown     : crown,
+			update    : update,
 			isEmpty   : isEmpty,
 			isOpponent: isOpponent
 		};
@@ -28,13 +25,14 @@
 
 		/**
 		 * @name		initData
-		 * @desc		initialises the data with game pieces
+		 * @summary	initialises the data with game pieces
 		 * 
 		 * @param  int numSquares
 		 * @param  int numPieces
 		 * @return array
 		 */
 		function initData(numSquares, numPieces) {
+			var deferred = $q.defer();
 
 			data = [];
 
@@ -46,13 +44,51 @@
 
 			data = data.concat(blacks, filler, whites);
 
-			return data;
+			deferred.resolve(data);
+
+			return deferred.promise;
 		}
 
 
 		/**
+		 * @name		update
+		 * @summary	updates the game data
+		 * @desc		an object containing the GamePiece that moved
+		 * 					and the moves made is passed in. The method
+		 * 					loops over the moves, rearranging where the 
+		 * 					GamePiece is stored in the data.
+		 *        	
+		 * @param  Object		moveData
+		 * @return Promise
+		 */
+		function update(moveData) {
+			var deferred = $q.defer();
+
+			if ( Object.prototype.toString.call(moveData.moves) !== "[object Array]" || !moveData.moves.length ) {
+				deferred.reject( "no moves to make!" );
+			}
+
+			try {				
+				moveData.moves.forEach(m => {
+
+					_update(moveData.gamePiece, m);
+
+				});
+
+				deferred.resolve(data);
+			}
+			catch(e) {
+				deferred.reject( e.getMessage() );
+			}
+
+			return deferred.promise;
+		}
+
+
+
+		/**
 		 * @name		getData
-		 * @desc		fetches the data
+		 * @summary		fetches the data
 		 * 
 		 * @return	array
 		 */
@@ -62,69 +98,10 @@
 
 
 
-		/**
-		 * @name		subscribe
-		 * @desc		adds callback to be run when data changes
-		 * 
-		 * @param  string   key
-		 * @param  Function callback
-		 * @return void
-		 */
-		function subscribe(key, callback) {
-			subscribers[key] = callback;
-		}
-
-
-
-		/**
-		 * @name		move
-		 * @desc		moves a game-piece
-		 * 
-		 * @param		string	fromId	the ID of the originating square
-		 * @param		string	toId 		the ID of the destination square.
-		 * @return	void
-		 */
-		function move(fromId, toId) {
-			_update(fromId, toId);
-		}
-
-
-
-		/**
-		 * @name		remove
-		 * @desc		removes a game-piece
-		 * 
-		 * @param		string	fromId	the ID of the square to remove from
-		 * @return	void
-		 */
-		function remove(fromId) {
-			_update(fromId);
-		}
-
-
-		/**
-		 * @name		crown
-		 * @desc		makes a given game piece a king
-		 * 
-		 * @param  String		sqId	the ID of the square the piece is occupying
-		 * @return void
-		 */
-		function crown(sqId) {
-			let index = _indexFromId(sqId);
-			let piece = data[index];
-
-			if (piece) {
-				piece.king = true;
-				data[index] = piece;
-
-				_notifySubscribers();
-			}
-		}
-
 
 		/**
 		 * @name		isEmpty
-		 * @desc		checks whether a position is occupied
+		 * @summary		checks whether a position is occupied
 		 * 
 		 * @param  String		sqId	square element.id
 		 * @return Boolean				is, or is not
@@ -138,7 +115,7 @@
 
 		/**
 		 * @name		isOpponent
-		 * @desc		checks whether the piece occupying a given
+		 * @summary		checks whether the piece occupying a given
 		 *        	position belongs to the opponnent
 		 *        	
 		 * @param		string  id			the square's element.id
@@ -160,53 +137,40 @@
 
 		/**
 		 * @name		_update
-		 * @desc		updates the game-piece data
+		 * @summary	updates the game-piece data
 		 * 
 		 * @param		string	fromId	the ID of the originating square
 		 * @param		string	toId 		the ID of the destination square.
 		 *                       		If empty game-piece is removed from the board.
 		 * @return	void
+		 * @throws	Exception				If the array index cannot be found from the ID
 		 */
-		function _update(fromId, toId) {
-			let fromIndex = _indexFromId(fromId);			
+		function _update(gamePiece, move) {
+			let indexFrom     = _indexFromId( move.source );
+			let indexTo       = _indexFromId( move.destination );
+			let indexCaptured = _indexFromId( move.captured );
 
-			if ( fromIndex > -1 ) {
-				let piece = data[fromIndex];
+			if ( indexFrom > -1 && indexTo > -1 ) {
 
-				data[fromIndex] = undefined;
+				data[indexTo]   = gamePiece;
+				data[indexFrom] = undefined;
 
-				// the piece may have been removed as opposed to moved
-				if (toId) {
-					let toIndex = _indexFromId(toId);
+				if ( indexCaptured > -1 ) {
 
-					if ( toIndex > -1 ) {
-						data[toIndex] = piece;
-					}
+					data[indexCaptured] = undefined;
+
 				}
 
-				_notifySubscribers();
+			}
+			else {
+				throw new Exception(`index not found from square IDs: ${move.source} ${move.destination}`);
 			}
 		}
 
 
-
-		/**
-		 * @name		_notifySubscribers
-		 * @desc		
-		 * @return void
-		 */
-		function _notifySubscribers() {
-
-			angular.forEach(subscribers, function(callback, key) {
-				callback();
-			});
-		}
-
-
-
 		/**
 		 * @name		_populatePieces
-		 * @desc		adds game-pieces to the data
+		 * @summary		adds game-pieces to the data
 		 * 
 		 * @param  int			numPieces
 		 * @param  string		shade
@@ -216,11 +180,8 @@
 
 			let arr = Array.apply(null, Array(numPieces)).map(function (el, idx) {
 				let oneBasedIndex = idx + 1;
-				return {
-					id       : `${shade}${oneBasedIndex}`,
-					shade    : shade,
-					direction: shade == "white" ? -1 : 1		// hacky
-				};
+
+				return new GamePiece(oneBasedIndex, shade);
 			});
 
 			return arr;
@@ -230,11 +191,16 @@
 
 		/**
 		 * @name		_indexFromId
-		 * @desc		extracts the data index from a square's ID
+		 * @summary		extracts the data index from a square's ID
 		 * @param		string	id	the square's ID
 		 * @return	int					the array index
 		 */
 		function _indexFromId(id) {
+
+			if ( typeof id !== "string" ) {
+				return -1;
+			}
+
 			// subtracting one to make it zero-based
 			return parseInt( id.substring(2) ) - 1;
 		}

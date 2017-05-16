@@ -1,14 +1,24 @@
 (function() {
 	"use strict";
 
+	let injections = [
+		"$rootScope",
+		"$document",
+		"$timeout",
+		"gamePositionService",
+		"dataTransferService",
+		"gameObituaryService",
+		gamePiece
+	];
+
 	angular
 		.module("draughts")
-		.directive("gamePiece", ["$document", "gamePositionService", "dataTransferService", gamePiece]);
+		.directive("gamePiece", injections);
 
-	function gamePiece($document, gamePositionService, dataTransferService) {
+	function gamePiece($rootScope, $document, $timeout, gamePosition, dataTransfer, obit) {
 
 		var template = `<div 	class="game-piece {{ piece.shade }}"
-													ng-class="{'king': piece.king, 'disabled': piece.shade !== inPlay}"
+													ng-class="{'king': piece.isKing(), 'disabled': piece.shade !== inPlay, 'captured': piece.captured}"
 													data-dir="{{ piece.direction }}"
 													data-piece-id="{{ piece.id }}"
 													draggable="true"></div>`;
@@ -18,11 +28,12 @@
 			controllerAs: "vm",
 			scope: {
 				piece   : "=",
-				inPlay  : "@"
+				inPlay  : "@",
+				delay   : "@",
+				update  : "&"
 			},
 			replace   : true,
 			template  : template,
-			//require   : ["^gamePiece", "^playingSquare"],
 			controller: GamePieceController,
 			link      : gamePieceLink
 		}
@@ -32,14 +43,17 @@
 
 		/**
 		 * @name		gamePieceLink
-		 * @desc		Directive post-link function
+		 * @summary	Directive post-link function
 		 * 
 		 * @param		Scope scope
 		 * @param		Element element
-		 * @return	Void}
+		 * @return	void
 		 */
 		function gamePieceLink(scope, element) {
-			var el = element[0];
+			var el            = element[0];
+			var possibleMoves = [];
+			var movesQueue    = [];
+			var timeout;
 
 			el.draggable = true;
 
@@ -48,68 +62,139 @@
 
 			scope.$on("$destroy", function() {
 
+				_stopTheClock();
 				el.removeEventListener("dragstart", dragStart, false);
 				el.removeEventListener("dragend", dragEnd, false);
 
 			});
+
+
+			// ************************************* FIXME: get multiple consecutive moves working
+
+			// highlight captured pieces as multiple consecutive
+			// moves are made
+
+			$rootScope.$on("the-raven", function(evt, data) {
+				if ( data.id == scope.piece.id ) {
+					scope.piece.captured = true;
+					console.log("captured: ", data.id);
+				}
+			});
+
 			
 
 			/**
-			 * @name	dragStart
-			 * @desc	
-			 * @param  {Event} evt the event
-			 * @return {Boolean}   false
+			 * @name		dragStart
+			 * @summary	stops the timeout clock if it's running (if a previous
+			 *          move captured an opposing piece) and checks for possible moves
+			 * 
+			 * @param  DragEvent	evt
+			 * @return void
 			 */
 			function dragStart(evt) {
 
-				if ( !el.classList.contains( scope.inPlay ) || scope.mustJump ) {
+				if ( !el.classList.contains( scope.inPlay ) ) {
+					console.log("no play: ", scope.inPlay);
 					evt.preventDefault();
-					return false;
+					return;
 				}
 
+				// kill timeout
+				_stopTheClock();
+
 				let sqId      = el.parentNode.id;
-				let moves     = [];
-				let shade     = el.classList.contains("white") ? "white" : "black";
-				let direction = el.classList.contains("king") ? 0 : parseInt(el.dataset.dir);
+				let shade     = scope.piece.shade;
+				let direction = scope.piece.direction;
+				let mustJump  = false;
 				let data      = {
 					gamePieceId: el.id,
 					sourceId   : sqId
 				};
 
-				// get all moves from this position
-				moves = gamePositionService.getMoves(sqId, shade, direction);
+
+				// if there was a previous move it was a jump
+				// so this move must also be a jump
+				if ( movesQueue.length ) {
+					mustJump = true;
+				}
+
+				// get all moves from this position, including jumps
+				possibleMoves = gamePosition.getMoves(sqId, shade, direction, mustJump);
 
 
 				// is any move allowed from here?
-				if ( !moves.length ) {
-
-					//console.log("no moves!");
-					
+				if ( !possibleMoves.length ) {
 					evt.preventDefault();
-					return false;
+					_endOfTurn();
+					return;
 				}
 
-				// store possible moves, including jumps
-				data.moves = moves;
+				// store possible moves
+				data.moves = possibleMoves;
 
-				dataTransferService.setAllowedEffect(evt, "move");
-				dataTransferService.setData(evt, data);
+				dataTransfer.setAllowedEffect(evt, "move");
+				dataTransfer.setData(evt, data);
 				
 				this.classList.add("dragging");
-				return false;
 			}
 
 
 
 			/**
 			 * @name		dragEnd
-			 * @desc		Remove "dragging" class from element
-			 * @param  {Event} evt the event
-			 * @return {Boolean}   false
+			 * @summary	pushes move taken onto the moves queue and
+			 * 					starts the timeout clock
+			 * 
+			 * @param  DragEvent	evt
+			 * @return void
 			 */
 			function dragEnd(evt) {
+				let moveTaken = {};
+				let lastMove  = gamePosition.getLastMove();
+				let data      = dataTransfer.getData(evt);
+
+				moveTaken = possibleMoves.filter(move => {
+					return move.destination == lastMove.destination;
+				})[0];
+
+				if (moveTaken) {
+
+					if ( moveTaken.captured ) {
+
+						obit.announce({ id: moveTaken.captured });
+					}
+
+					movesQueue.push(moveTaken);
+
+					// if now king update data directly so this move
+					// can move all directions
+					if ( gamePosition.isInCrownHead(el.id) ) {
+						scope.piece.crown();
+					}
+					
+					_startTheClock( moveTaken.captured ? parseInt(scope.delay) : 0 );
+				}
+
 				this.classList.remove("dragging");
-				return false;
+				possibleMoves = [];
+			}
+
+
+
+			function _startTheClock(delay) {
+				timeout = $timeout(_endOfTurn, delay || 0);
+			}
+
+			function _stopTheClock() {
+				$timeout.cancel(timeout);
+			}
+
+
+			function _endOfTurn() {
+				let data = { gamePiece: scope.piece, moves: movesQueue };
+				movesQueue = [];
+
+				scope.update()( data );
 			}
 		}
 	}
@@ -119,7 +204,7 @@
 
 	/**
 	 * @name	GamePieceController
-	 * @desc	
+	 * @summary	
 	 * @param {Scope} $scope
 	 */
 	function GamePieceController($scope, $element) {

@@ -23,7 +23,7 @@
 
 		/**
 		 * @name		getDataTransfer
-		 * @desc		gets the Event.dataTransfer and parses it
+		 * @summary		gets the Event.dataTransfer and parses it
 		 * 
 		 * @param  Event		evt
 		 * @return Object		JSON

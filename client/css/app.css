@@ -96,6 +96,10 @@ game-board {
 	opacity: 0.7;
 }
 
+.captured {
+	opacity: 0.3;
+}
+
 .over {
 	background: -webkit-radial-gradient(center, ellipse cover, #aaaaaa 0%,#e5e5e5 100%); /* Chrome10-25,Safari5.1-6 */
 	background: radial-gradient(ellipse at center, #aaaaaa 0%,#e5e5e5 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */

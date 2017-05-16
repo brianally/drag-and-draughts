@@ -3,12 +3,14 @@
 
 	angular
 		.module("draughts")
-		.factory("gamePositionService", ["$document", "$window", "gameDataService", gamePositionService]);
+		.factory("gamePositionService", ["$document", "$window", "BoardMove", "gameDataService", gamePositionService]);
 
-	function gamePositionService($document, $window, gameDataService) {
+	function gamePositionService($document, $window, BoardMove, gameDataService) {
 
+		var boardPos  = {};
 		var positions = [];
-
+		var lastMove  = {};
+		
 		var service   = {
 			getPosition             : getPosition,
 			getMoves                : getMoves,
@@ -16,41 +18,33 @@
 			getNeighboursFromId     : getNeighboursFromId,
 			getNextNeighbourId      : getNextNeighbourId,
 			getNeighbourIdAtPosition: getNeighbourIdAtPosition,
+			getLastMove             : getLastMove,
+			setLastMove             : setLastMove,
 			isOccupied              : isOccupied,
 			isInCrownHead           : isInCrownHead
 		};
-
-		// directives don't exist yet!
-		// _init();
 
 		return service;
 
 
 		/**
 		 * @name	_init
-		 * @desc	collects positions of all squares
+		 * @summary	collects positions of all squares
 		 * 
 		 * @return {Array}
 		 */
 		function _init() {
 
+			let board     = $document[0].querySelector("#game-board");
+			let boardRect = board.getBoundingClientRect();
+			
+			boardPos = _roundRect(boardRect, boardPos);
+
 			let squares = $document[0].querySelectorAll(".playing-square");
 
 			squares.forEach(sq => {
 				let domRect = sq.getBoundingClientRect();
-				let pos     = {};
-
-				// The CSS for the square sizes uses percent to several
-				// decimal places to allow for a proportional game board.
-				// But this causes the DOMRect to similarly use high precision,
-				// which means that the corner positions of adjoining squares
-				// no longer match without rounding.
-				// 
-				// DOMRect (from getBoundingClientRect) is getter-only so we
-				// cannot update in place.
-				for (let side in domRect) {
-					pos[side] = Math.round(domRect[side]);
-				}
+				let pos     = _roundRect(domRect);
 
 				positions.push({ id: sq.id, pos: pos });
 			});
@@ -62,7 +56,7 @@
 
 		/**
 		 * @name		getPosition
-		 * @desc		gets the position object for a given square
+		 * @summary		gets the position object for a given square
 		 * 
 		 * @param  {String} id		the square element.id
 		 * @return {Object}   
@@ -79,20 +73,22 @@
 
 		/**
 		 * @name		getMoves
-		 * @desc		tests whether a piece has a legal move from
+		 * @summary	tests whether a piece has a legal move from
 		 *        	starting square
 		 * 
-		 * @param		String  id        starting square element.id
+		 * @param		String  sourceId	starting square element.id
 		 * @param		String	shade			white or black
 		 * @param		Int  		direction	1: black's initial direction;
 		 *                          	-1: white's initial direction;
 		 *                          	0: any direction
+		 * @param		Boolean	mustJump	If previously captured a piece the next move must be a jump
+		 *  
 		 * @return	array							objects holding IDs of possible squares, with possible jumps
 		 */
-		function getMoves(id, shade, direction) {
-			var moves             = [];
-			var directionsToCheck = [];
-			let neighbours        = this.getNeighboursFromId(id, direction);
+		function getMoves(sourceId, shade, direction, mustJump) {
+			let moves             = [];
+			let directionsToCheck = [];
+			let neighbours        = this.getNeighboursFromId(sourceId, direction);
 
 			// fugly!
 			switch (direction) {
@@ -111,23 +107,29 @@
 			["e", "w"].forEach(h => {
 
 				directionsToCheck.forEach(v => {
-					let key = `${v}${h}`;
-					let sq  = neighbours[key];
+					let move;
+					let key  = `${v}${h}`;
+					let sq   = neighbours[key];
 
 					// if starting square is along edge neighbour[key] may not exist
 					if (sq) {
 
-						if ( gameDataService.isEmpty(sq.id) ) {
-							moves.push({ destination: sq.id });
+						if ( gameDataService.isEmpty(sq.id) && !mustJump ) {
+							
+							move = new BoardMove( sourceId, sq.id );
+							moves.push( move );
 						}
 						else if ( gameDataService.isOpponent(sq.id, shade) ) {
-							// can opponent be jumped?
-							let jumpSqId = this.getNextNeighbourId(id, sq.id);
 
-							if (jumpSqId != null) {	// possible if edge of game board
+							// can opponent be jumped?
+							let jumpSqId = this.getNextNeighbourId(sourceId, sq.id);
+
+							if ( jumpSqId != null ) {	// if not at edge of game board
 
 								if ( gameDataService.isEmpty(jumpSqId) ) {
-									moves.push({ destination: jumpSqId, jumped: sq.id });
+
+									move = new BoardMove( sourceId, jumpSqId, sq.id );
+									moves.push( move );
 								}
 							}
 						}
@@ -140,8 +142,8 @@
 
 
 		/**
-		 * @name	getNeighbours
-		 * @desc	Get the neighbouring squares of one that is being moved from
+		 * @name		getNeighbours
+		 * @summary	Get the neighbouring squares of one that is being moved from
 		 * 
 		 * @param		DOMRect source  the source square's positions
 		 * @param		Int			dir			direction of travel: l->r: 1; r->l: -1; king: 0
@@ -200,8 +202,8 @@
 
 
 		/**
-		 * @name	getNeighboursFromId
-		 * @desc	gets the neighbouring squares of one that is being moved from
+		 * @name		getNeighboursFromId
+		 * @summary	gets the neighbouring squares of one that is being moved from
 		 * 
 		 * @param  String		id  the source element.id
 		 * @param  Int			dir direction of travel: l->r: 1; r->l: -1; king: 0
@@ -225,7 +227,7 @@
 
 		/**
 		 * @name		getNextNeighbourId
-		 * @desc		fetches the ID for the next square in line
+		 * @summary	fetches the ID for the next square in line
 		 * 					with starting square and between square
 		 * 					
 		 * @param  String idStart   element.id
@@ -263,7 +265,7 @@
 
 		/**
 		 * @name		getNeighbourIdAtPosition
-		 * @desc		fetches the ID of the square at a given position
+		 * @summary	fetches the ID of the square at a given position
 		 * 
 		 * @param		Object sides	one or more positions to check
 		 * @return	String				the square's element.id
@@ -284,10 +286,18 @@
 			return null;
 		}
 
+		function getLastMove() {
+			return lastMove;
+		}
+
+		function setLastMove(move) {
+			lastMove = move;
+		}
+
 
 		/**
 		 * @name		isOccupied
-		 * @desc		checks whether a square is occupied
+		 * @summary	checks whether a square is occupied
 		 * 
 		 * @param		String		sqId	square element.id
 		 * @return	Boolean					is, or is not
@@ -297,22 +307,58 @@
 		}
 
 
-// **************************************** SHOULD MOVE TO GAME DATA SERVICE?
 
 		/**
 		 * @name		isInCrownHead
-		 * @desc		checks whether a square is in first row
+		 * @summary	checks whether a square is in first row
 		 * 
 		 * @param		String		sqId	square element.id
 		 * @return	Boolean					is, or is not
 		 */
 		function isInCrownHead(sqId) {
-			let index = parseFloat(sqId.substr(2));	// id is eg. sq1, sq22, etc.
 
-			return ( index >= 1 && index <= 4 ) || ( index >= 29 && index <= 32 );
+			let sq = positions.filter(function(s) {
+				return s.id == sqId;
+			})[0];
+
+			if (sq) {
+				return ( sq.pos.top == boardPos.top || sq.pos.bottom == boardPos.bottom );
+			}
+
+			return false;
+		}
+
+
+
+		/**
+		 * @name		_roundRect
+		 * @summary	rounds the values of a DomRect
+		 * @desc		The CSS for the square sizes uses percent to several
+		 *        	decimal places to allow for a proportional game board.
+		 *        	But this causes the DOMRect to similarly use high precision,
+		 *        	which means that the corner positions of adjoining squares
+		 *        	no longer match without rounding.
+		 *        	
+		 *        	DOMRect (from getBoundingClientRect) is getter-only so we
+		 *        	cannot update in place.
+		 * 
+		 * @param  ClientRect	domRect
+		 * @param  Object			proxy			an empty vailla object
+		 * @return Object
+		 */
+		function _roundRect(domRect, proxy) {
+
+			if ( proxy == undefined ) {
+				proxy = {};
+			}
+
+			for (let side in domRect) {
+				proxy[side] = Math.round( domRect[side] );
+			}
+
+			return proxy;
 		}
 	}
-
 
 }());
 

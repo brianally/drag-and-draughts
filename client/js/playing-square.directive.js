@@ -13,7 +13,10 @@
 													droppable="true">
 											<game-piece	ng-if="!!piece"
 												data-piece="piece"
-												data-in-play="{{ inPlay }}"></game-piece>
+												data-in-play="{{ inPlay }}"
+												data-delay="{{ delay }}"
+												data-dropped="dropped()"
+												data-update="update()"></game-piece>
 										</div>`;
 
 
@@ -21,13 +24,11 @@
 			restrict    : "E",
 			controllerAs: "vm",
 			scope: {
-				sqId    : "@",
-				piece   : "=",
-				inPlay  : "@",
-				move    : "&",
-				capture : "&",
-				makeKing: "&",
-				dropped : "&"
+				sqId  : "@",
+				piece : "=",
+				inPlay: "@",
+				delay : "@",
+				update: "&"
 			},
 			replace   : true,
 			template  : template,
@@ -44,7 +45,7 @@
 
 		/**
 		 * @name	playingSquareLink
-		 * @desc	Directive post-link function
+		 * @summary	Directive post-link function
 		 * 
 		 * @param  {Scope} scope
 		 * @param  {Element} element
@@ -55,48 +56,47 @@
 
 			el.droppable = true;
 
-			el.addEventListener("dragenter", dragEnter, false);
+			//el.addEventListener("dragenter", dragEnter, false);
 			el.addEventListener("dragover", dragOver, false);
 			el.addEventListener("drop", drop, false);
 
-			["dragleave", "dragend", "dragexit"].forEach(eventName => {
-				el.addEventListener(eventName, leaveEndExit, false);
+			["dragleave", "dragexit"].forEach(eventName => {
+				el.addEventListener(eventName, leaveOrExit, false);
 			});
 
 			scope.$on("$destroy", function() {
 
-				el.removeEventListener("dragenter", dragenter, false);
+				//el.removeEventListener("dragenter", dragenter, false);
 				el.removeEventListener("dragover", dragover, false);
 				el.removeEventListener("drop", drop, false);
 
-				["dragleave", "dragend", "dragexit"].forEach(eventName => {
-					el.removeEventListener(eventName, leaveEndExit, false);
+				["dragleave", "dragexit"].forEach(eventName => {
+					el.removeEventListener(eventName, leaveOrExit, false);
 				});
 			});
 
 
 			/**
-			 * @name		leaveEndExit
-			 * @desc		removes css classes
+			 * @name		leaveOrExit
+			 * @summary		removes css classes
 			 *        	
-			 * @param  Event evt "dragleave", "dragend", or "dragexit"
-			 * @return Boolean   false
+			 * @param  DragEvent	evt
+			 * @return void
 			 */
-			function leaveEndExit(evt) {
+			function leaveOrExit(evt) {
 				this.classList.remove("over");
 				this.classList.remove("warn");
-				console.log(evt.type);
-				return false;
+				//console.log(evt.type);
 			}
 			
 
 			/**
 			 * @name		dragEnter
-			 * @desc		highlight entered square,
+			 * @summary		highlight entered square,
 			 *        	warn if not allowed.
 			 *        	
-			 * @param  Event evt "dragenter"
-			 * @return Boolean   false
+			 * @param  DragEvent	evt
+			 * @return void
 			 */
 			function dragEnter(evt) {
 
@@ -106,44 +106,34 @@
 				} else {
 					this.classList.add("over");
 				}
-				
-				if (evt.preventDefault) evt.preventDefault();
-				return false;
 			}
 
 
 			/**
 			 * @name		dragOver
-			 * @desc		Set the dropEffect
+			 * @summary	calls preventDefault() so as to allow dropping
 			 * 
-			 * @param  Event evt "dragover"
-			 * @return Boolean   false
+			 * @param  DragEvent evt
+			 * @return void
 			 */
 			function dragOver(evt) {
-				//evt.dataTransfer.dropEffect = "move";
-
-				if (evt.preventDefault) evt.preventDefault();
-				return false;
+				evt.preventDefault();
 			}
 
 
 			/**
 			 * @name		drop
-			 * @desc		Determine whether game piece may be moved
+			 * @summary		Determine whether game piece may be moved
 			 *        	to this position. If moving one square, is
 			 *        	it: a) empty? b)in the correct direction?
 			 *        	If taking opponent's piece is it a valid jump?
 			 * 
-			 * @param  Event evt "drop"
-			 * @return Boolean   false
+			 * @param  DragEvent	evt
+			 * @return void
 			 */
 			function drop(evt) {
 				let moveTaken = {};
 				let data      = dataTransferService.getData(evt);
-				let gamePiece = $document[0].querySelector(`#${data.pieceId}`);
-
-				if (evt.stopPropagation) evt.stopPropagation();
-				if (evt.preventDefault) evt.preventDefault();
 
 				// data.moves holds all possible moves for the piece. 
 				// Extract the one for this square.
@@ -153,30 +143,19 @@
 
 				if (moveTaken) {
 				
-					//evt.dataTransfer.dropEffect = "move";															// ***********************
+					//evt.dataTransfer.dropEffect = "move";
 					this.classList.remove("over");
 
-					scope.move()( data.sourceId, moveTaken.destination );
+					// The dataTransfer object is unavailable in dragend handler
+					// inside the game-piece directive. This is a workaround to save the
+					// move in the service so it can be picked up in the other directive.
+					gamePositionService.setLastMove(moveTaken);
 
-
-					// If a piece was jumped, handle that
-					if ( moveTaken.jumped ) {
-						scope.capture()(moveTaken.jumped);
-					}
-
-					// is now king?
-					if ( gamePositionService.isInCrownHead(el.id) ) {
-						scope.makeKing()(el.id);										// FIXME: feels weird being here
-					}
-
-					scope.dropped()( typeof moveTaken.jumped !== "undefined" );
-
+					dataTransferService.setData(evt, moveTaken);
 				}
 				
 				
 				this.classList.remove("warn"); // why is this necessary?
-
-				return false;
 			}
 		}
 	}
@@ -186,7 +165,7 @@
 
 	/**
 	 * @name	PlayingSquareController
-	 * @desc	
+	 * @summary	
 	 * @param Scope $scope
 	 */
 	function PlayingSquareController($scope, $element) {
