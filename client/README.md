@@ -1,3 +1,3 @@
 ## Client
 
-This is the place for your application front-end files.
+This can be launched without the server (which doesn't do much of anything yet) using file://
