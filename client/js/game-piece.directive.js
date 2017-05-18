@@ -4,7 +4,6 @@
 	let injections = [
 		"$rootScope",
 		"$document",
-		"$timeout",
 		"gamePositionService",
 		"dataTransferService",
 		"gameObituaryService",
@@ -15,10 +14,10 @@
 		.module("draughts")
 		.directive("gamePiece", injections);
 
-	function gamePiece($rootScope, $document, $timeout, gamePosition, dataTransfer, obit) {
+	function gamePiece($rootScope, $document, gamePosition, dataTransfer, obit) {
 
 		var template = `<div 	class="game-piece {{ piece.shade }}"
-													ng-class="{'king': piece.isKing(), 'disabled': piece.shade !== inPlay, 'captured': piece.captured}"
+													ng-class="{'king': piece.isKing(), 'disabled': isDisabled(), 'captured': piece.captured}"
 													data-dir="{{ piece.direction }}"
 													data-piece-id="{{ piece.id }}"
 													draggable="true"></div>`;
@@ -29,7 +28,7 @@
 			scope: {
 				piece   : "=",
 				inPlay  : "@",
-				delay   : "@",
+				isMoving: "=",
 				update  : "&"
 			},
 			replace   : true,
@@ -53,8 +52,6 @@
 			var el            = element[0];
 
 			var possibleMoves = [];
-			var movesQueue    = [];
-			var timeout;
 
 			el.draggable = true;
 
@@ -63,7 +60,6 @@
 
 			scope.$on("$destroy", function() {
 
-				_stopTheClock();
 				el.removeEventListener("dragstart", dragStart, false);
 				el.removeEventListener("dragend", dragEnd, false);
 
@@ -99,9 +95,6 @@
 					return;
 				}
 
-				// kill timeout
-				_stopTheClock();
-
 				let sqId      = el.parentNode.id;
 				let shade     = scope.piece.shade;
 				let direction = scope.piece.direction;
@@ -114,7 +107,7 @@
 
 				// if there was a previous move it was a jump
 				// so this move must also be a jump
-				if ( movesQueue.length ) {
+				if ( scope.isMoving == scope.piece.id ) {
 					mustJump = true;
 				}
 
@@ -124,8 +117,7 @@
 
 				// is any move allowed from here?
 				if ( !possibleMoves.length ) {
-					evt.preventDefault();
-					_endOfTurn();
+					evt.preventDefault();																		// FIXME: need to announce this back to game control
 					return;
 				}
 
@@ -153,6 +145,8 @@
 				let lastMove  = gamePosition.getLastMove();
 				let data      = dataTransfer.getData(evt);
 
+				this.classList.remove("dragging");
+
 				moveTaken = possibleMoves.filter(move => {
 					return move.destination == lastMove.destination;
 				})[0];
@@ -164,37 +158,15 @@
 						obit.announce({ id: moveTaken.captured });
 					}
 
-					movesQueue.push(moveTaken);
-
 					// if now king update data directly so this move
 					// can move all directions
-					if ( gamePosition.isInCrownHead(el.id) ) {
+					if ( gamePosition.isInCrownHead( scope.piece.id ) ) {
+
 						scope.piece.crown();
 					}
 					
-					_startTheClock( moveTaken.captured ? parseInt(scope.delay) : 0 );
+					scope.update()( { gamePiece: scope.piece, move: moveTaken } );
 				}
-
-				this.classList.remove("dragging");
-				possibleMoves = [];
-			}
-
-
-
-			function _startTheClock(delay) {
-				timeout = $timeout(_endOfTurn, delay || 0);
-			}
-
-			function _stopTheClock() {
-				$timeout.cancel(timeout);
-			}
-
-
-			function _endOfTurn() {
-				let data = { gamePiece: scope.piece, moves: movesQueue };
-				movesQueue = [];
-
-				scope.update()( data );
 			}
 		}
 	}
@@ -209,5 +181,17 @@
 	 */
 	function GamePieceController($scope, $element) {
 		var vm = this;
+
+		$scope.isDisabled = function() {
+
+			if ( !$scope.isMoving && $scope.piece.shade == $scope.inPlay ) {
+				return false;
+			}
+			else if ( $scope.isMoving == $scope.piece.id ) {
+				return false;
+			}
+
+			return true;
+		}
 	}
 }());

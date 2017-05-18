@@ -19,22 +19,30 @@
 		let numSquares = 32; // dark only; for a 64-sq board
 		let numPieces  = 12; // per side
 
-
-		$scope.inPlay = "white";
-		$scope.delay  = 2000;
+		$scope.delay    = 2000;
+		$scope.inPlay   = "white";
 
 		// initialises the gamePieces
-		gameData.initData(numSquares, numPieces).then(function(data) {
-			$scope.gamePieceData = data;
+		gameData.initData(numSquares, numPieces).then(function(result) {
+			$scope.gamePieceData = result.data;
+			$scope.isMoving      = false;
 		});
 
 
 		// updates gamePiece positions
-		$scope.update = function(moves) {
-			gameData.update(moves).then(function(data) {
+		$scope.update = function(moveData) {
+			gameData.update(moveData).then(function(result) {
 
-				$scope.inPlay        = ( $scope.inPlay === "white" ? "black" : "white" );
-				$scope.gamePieceData = data;
+				// updated player data
+				$scope.gamePieceData = result.data;
+
+				// piece with another move coming because of capture
+				$scope.isMoving = result.isMoving;
+
+				// if player does not have consecutive move coming toggle side
+				if ( !result.isMoving ) {
+					$scope.inPlay = ( $scope.inPlay === "white" ? "black" : "white" );
+				}
 
 			}, function(msg) {
 				console.log(msg);

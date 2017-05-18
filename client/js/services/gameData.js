@@ -7,7 +7,7 @@
 
 	function gameDataService($q, GamePiece) {
 
-		var data        = [];
+		var data = [];
 
 		var service = {
 			initData  : initData,
@@ -27,12 +27,13 @@
 		 * 
 		 * @param  int numSquares
 		 * @param  int numPieces
-		 * @return array
+		 * @return promise
 		 */
 		function initData(numSquares, numPieces) {
-			var deferred = $q.defer();
 
-			data = [];
+			data         = [];
+			let output   = {};
+			let deferred = $q.defer();			
 
 			let fillSize = numSquares - (numPieces * 2);
 			
@@ -40,9 +41,11 @@
 			let filler   = Array.apply(null, Array(fillSize)).map(function () {});
 			let whites   = _populatePieces(numPieces, "white");
 
-			data = data.concat(blacks, filler, whites);
+			data            = data.concat(blacks, filler, whites);
+			output.data     = data;
+			output.isMoving = false;
 
-			deferred.resolve(data);
+			deferred.resolve(output);
 
 			return deferred.promise;
 		}
@@ -60,20 +63,12 @@
 		 * @return Promise
 		 */
 		function update(moveData) {
-			var deferred = $q.defer();
-
-			if ( Object.prototype.toString.call(moveData.moves) !== "[object Array]" || !moveData.moves.length ) {
-				deferred.reject( "no moves to make!" );
-			}
+			let output;
+			let deferred = $q.defer();
 
 			try {				
-				moveData.moves.forEach(m => {
-
-					_update(moveData.gamePiece, m);
-
-				});
-
-				deferred.resolve(data);
+				output = _update(moveData);
+				deferred.resolve(output);
 			}
 			catch(e) {
 				deferred.reject( e.getMessage() );
@@ -143,25 +138,28 @@
 		 * @return	void
 		 * @throws	Exception				If the array index cannot be found from the ID
 		 */
-		function _update(gamePiece, move) {
-			let indexFrom     = _indexFromId( move.source );
-			let indexTo       = _indexFromId( move.destination );
-			let indexCaptured = _indexFromId( move.captured );
+		function _update(moveData) {
+			let indexFrom     = _indexFromId( moveData.move.source );
+			let indexTo       = _indexFromId( moveData.move.destination );
+			let indexCaptured = _indexFromId( moveData.move.captured );
 
 			if ( indexFrom > -1 && indexTo > -1 ) {
 
-				data[indexTo]   = gamePiece;
+				data[indexTo]   = moveData.gamePiece;
 				data[indexFrom] = undefined;
 
 				if ( indexCaptured > -1 ) {
 
 					data[indexCaptured] = undefined;
-
 				}
-
 			}
 			else {
-				throw new Exception(`index not found from square IDs: ${move.source} ${move.destination}`);
+				throw new Exception(`index not found from square IDs: ${moveData.move.source} ${moveData.move.destination}`);
+			}
+
+			return {
+				data    : data,
+				isMoving: moveData.move.captured ? moveData.gamePiece.id : false
 			}
 		}
 

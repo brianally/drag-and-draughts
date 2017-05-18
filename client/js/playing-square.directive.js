@@ -21,7 +21,7 @@
 											<game-piece	ng-if="!!piece"
 												data-piece="piece"
 												data-in-play="{{ inPlay }}"
-												data-delay="{{ delay }}"
+												data-is-moving="isMoving"
 												data-dropped="dropped()"
 												data-update="update()"></game-piece>
 										</div>`;
@@ -31,11 +31,11 @@
 			restrict    : "E",
 			controllerAs: "vm",
 			scope: {
-				sqId  : "@",
-				piece : "=",
-				inPlay: "@",
-				delay : "@",
-				update: "&"
+				sqId    : "@",
+				piece   : "=",
+				inPlay  : "@",
+				isMoving: "=",
+				update  : "&"
 			},
 			replace   : true,
 			template  : template,
@@ -70,7 +70,7 @@
 			scope.$on("$destroy", function() {
 
 				//el.removeEventListener("dragenter", dragenter, false);
-				el.removeEventListener("dragover", dragover, false);
+				el.removeEventListener("dragover", dragOver, false);
 				el.removeEventListener("drop", drop, false);
 
 				["dragleave", "dragexit"].forEach(eventName => {
