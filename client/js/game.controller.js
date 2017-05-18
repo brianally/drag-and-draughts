@@ -1,12 +1,19 @@
 (function() {
 	"use strict";
+	let injections = [
+		"$scope",
+		"$timeout",
+		"gameDataService",
+		"gamePositionService",
+		gameCtrl
+	];
 
 	angular
 		.module("draughts")
-		.controller("GameCtrl", ["$scope", "$timeout", "gameDataService", "gameObituaryService", gameCtrl]);
+		.controller("GameCtrl", injections);
 
 
-	function gameCtrl($scope, $timeout, gameDataService, obit) {
+	function gameCtrl($scope, $timeout, gameData, gamePosition) {
 
 		// this will be passed in by select list later
 		let numSquares = 32; // dark only; for a 64-sq board
@@ -16,14 +23,15 @@
 		$scope.inPlay = "white";
 		$scope.delay  = 0;
 
-		gameDataService.initData(numSquares, numPieces).then(function(data) {
+		// initialises the gamePieces
+		gameData.initData(numSquares, numPieces).then(function(data) {
 			$scope.gamePieceData = data;
 		});
 
 
-
+		// updates gamePiece positions
 		$scope.update = function(moves) {
-			gameDataService.update(moves).then(function(data) {
+			gameData.update(moves).then(function(data) {
 
 				$scope.inPlay        = ( $scope.inPlay === "white" ? "black" : "white" );
 				$scope.gamePieceData = data;
@@ -32,5 +40,10 @@
 				console.log(msg);
 			});
 		}
+
+		// initialises gameSquare positions
+		$scope.$$postDigest(function() {
+			gamePosition.init();
+		});
 	}
 }());

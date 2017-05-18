@@ -1,12 +1,19 @@
 (function() {
 	"use strict";
 
+	let injections = [
+		"$document",
+		"gamePositionService",
+		"dataTransferService",
+		playingSquare
+	];
+
 	angular
 		.module("draughts")
-		.directive("playingSquare", ["$document", "gamePositionService", "dataTransferService", playingSquare]);
+		.directive("playingSquare", injections);
 
 
-	function playingSquare($document, gamePositionService, dataTransferService) {
+	function playingSquare($document, gamePosition, dataTransfer) {
 
 		var template = `<div	class="playing-square"
 													id="sq{{ sqId }}"
@@ -36,11 +43,7 @@
 			link      : playingSquareLink
 		}
 
-
-
 		return directive;
-
-
 
 
 		/**
@@ -101,7 +104,7 @@
 			function dragEnter(evt) {
 
 				// ensure not empty
-				if ( gamePositionService.isOccupied(evt.target.id) ) {
+				if ( gamePosition.isOccupied(evt.target.id) ) {
 					this.classList.add("warn");
 				} else {
 					this.classList.add("over");
@@ -133,7 +136,7 @@
 			 */
 			function drop(evt) {
 				let moveTaken = {};
-				let data      = dataTransferService.getData(evt);
+				let data      = dataTransfer.getData(evt);
 
 				// data.moves holds all possible moves for the piece. 
 				// Extract the one for this square.
@@ -149,9 +152,9 @@
 					// The dataTransfer object is unavailable in dragend handler
 					// inside the game-piece directive. This is a workaround to save the
 					// move in the service so it can be picked up in the other directive.
-					gamePositionService.setLastMove(moveTaken);
+					gamePosition.setLastMove(moveTaken);
 
-					dataTransferService.setData(evt, moveTaken);
+					dataTransfer.setData(evt, moveTaken);
 				}
 				
 				
@@ -161,8 +164,6 @@
 	}
 
 
-	//PlayingSquareController.$inject = ["$scope", "$document", "gamePositionService"];
-
 	/**
 	 * @name	PlayingSquareController
 	 * @summary	
@@ -170,8 +171,6 @@
 	 */
 	function PlayingSquareController($scope, $element) {
 		var vm = this;
-		
-
 
 	}
 	

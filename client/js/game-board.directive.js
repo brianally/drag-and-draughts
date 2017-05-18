@@ -7,9 +7,16 @@
 
 	function gameBoard($document, gamePositionService) {
 
-		var directive = {
+		let template = `<div class="game-board">
+											<div ng-transclude></div>
+										</div>`;
+
+		let directive = {
 			restrict    : "E",
 			controllerAs: "vm",
+			template    : template,
+			replace     : true,
+			transclude  : true,
 			controller  : GameBoardController,
 			link        : gameBoardLink
 		}
@@ -19,7 +26,7 @@
 
 		/**
 		 * @name		gameBoardLink
-		 * @summary		Directive post-link function
+		 * @summary	Directive post-link function
 		 * 
 		 * @param		{Scope} scope
 		 * @param		{Element} element

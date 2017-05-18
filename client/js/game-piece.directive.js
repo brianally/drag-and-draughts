@@ -51,6 +51,7 @@
 		 */
 		function gamePieceLink(scope, element) {
 			var el            = element[0];
+
 			var possibleMoves = [];
 			var movesQueue    = [];
 			var timeout;
@@ -94,7 +95,6 @@
 			function dragStart(evt) {
 
 				if ( !el.classList.contains( scope.inPlay ) ) {
-					console.log("no play: ", scope.inPlay);
 					evt.preventDefault();
 					return;
 				}

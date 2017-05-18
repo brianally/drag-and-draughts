@@ -1,17 +1,26 @@
 (function() {
 	"use strict";
 
+	let injections = [
+		"$document",
+		"$window",
+		"BoardMove",
+		"gameDataService",
+		gamePositionService
+	];
+
 	angular
 		.module("draughts")
-		.factory("gamePositionService", ["$document", "$window", "BoardMove", "gameDataService", gamePositionService]);
+		.factory("gamePositionService", injections);
 
-	function gamePositionService($document, $window, BoardMove, gameDataService) {
+	function gamePositionService($document, $window, BoardMove, gameData) {
 
 		var boardPos  = {};
 		var positions = [];
 		var lastMove  = {};
 		
 		var service   = {
+			init                    : init,
 			getPosition             : getPosition,
 			getMoves                : getMoves,
 			getNeighbours           : getNeighbours,
@@ -28,19 +37,18 @@
 
 
 		/**
-		 * @name	_init
+		 * @name	init
 		 * @summary	collects positions of all squares
 		 * 
 		 * @return {Array}
 		 */
-		function _init() {
+		function init() {
 
 			let board     = $document[0].querySelector("#game-board");
 			let boardRect = board.getBoundingClientRect();
+			let squares   = $document[0].querySelectorAll(".playing-square");
 			
 			boardPos = _roundRect(boardRect, boardPos);
-
-			let squares = $document[0].querySelectorAll(".playing-square");
 
 			squares.forEach(sq => {
 				let domRect = sq.getBoundingClientRect();
@@ -49,20 +57,19 @@
 				positions.push({ id: sq.id, pos: pos });
 			});
 
-			angular.element($window).bind('resize', _init);
+			angular.element($window).bind('resize', init);
 		}
 
 
 
 		/**
 		 * @name		getPosition
-		 * @summary		gets the position object for a given square
+		 * @summary	gets the position object for a given square
 		 * 
 		 * @param  {String} id		the square element.id
 		 * @return {Object}   
 		 */
 		function getPosition(id) {
-			if ( !positions.length ) _init();	// hacky!
 
 			return positions.filter(p => {
 				return p.id == id;
@@ -114,19 +121,19 @@
 					// if starting square is along edge neighbour[key] may not exist
 					if (sq) {
 
-						if ( gameDataService.isEmpty(sq.id) && !mustJump ) {
+						if ( gameData.isEmpty(sq.id) && !mustJump ) {
 							
 							move = new BoardMove( sourceId, sq.id );
 							moves.push( move );
 						}
-						else if ( gameDataService.isOpponent(sq.id, shade) ) {
+						else if ( gameData.isOpponent(sq.id, shade) ) {
 
 							// can opponent be jumped?
 							let jumpSqId = this.getNextNeighbourId(sourceId, sq.id);
 
 							if ( jumpSqId != null ) {	// if not at edge of game board
 
-								if ( gameDataService.isEmpty(jumpSqId) ) {
+								if ( gameData.isEmpty(jumpSqId) ) {
 
 									move = new BoardMove( sourceId, jumpSqId, sq.id );
 									moves.push( move );
@@ -151,7 +158,6 @@
 		 * @see https://developer.mozilla.org/en-US/docs/Mozilla/Tech/XPCOM/Reference/Interface/nsIDOMClientRect
 		 */
 		function getNeighbours(source, dir) {
-			if ( !positions.length ) _init();	// sacky!
 
 			let neighbours         = [];
 			let neighboursRelative = {};
@@ -298,7 +304,7 @@
 		 * @return	Boolean					is, or is not
 		 */
 		function isOccupied(sqId) {
-			return !gameDataService.isEmpty(sqId);
+			return !gameData.isEmpty(sqId);
 		}
 
 
