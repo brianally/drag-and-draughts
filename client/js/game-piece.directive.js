@@ -6,7 +6,6 @@
 		"$document",
 		"gamePositionService",
 		"dataTransferService",
-		"gameObituaryService",
 		gamePiece
 	];
 
@@ -14,26 +13,19 @@
 		.module("draughts")
 		.directive("gamePiece", injections);
 
-	function gamePiece($rootScope, $document, gamePosition, dataTransfer, obit) {
 
-		var template = `<div 	id="{{ piece.id }}"
-													class="game-piece {{ piece.shade }}"
-													ng-class="{'king': isKing(), 'disabled': isDisabled(), 'captured': piece.captured}"
-													data-dir="{{ piece.direction }}"
-													id="{{ piece.id }}"
-													draggable="true"></div>`;
+	function gamePiece($rootScope, $document, gamePosition, dataTransfer) {
 
 		var directive = {
 			restrict    : "E",
-			controllerAs: "vm",
+			controllerAs: "gpCtrl",
 			scope: {
-				piece   : "=",
-				inPlay  : "@",
-				isMoving: "=",
-				update  : "&"
+				piece    : "=",
+				inPlay   : "@",
+				isMoving : "=",
+				update   : "&",
+				yieldTurn: "&"
 			},
-			replace   : true,
-			template  : template,
 			controller: GamePieceController,
 			link      : gamePieceLink
 		}
@@ -51,10 +43,8 @@
 		 */
 		function gamePieceLink(scope, element) {
 			var el            = element[0];
-
 			var possibleMoves = [];
 
-			el.draggable = true;
 
 			el.addEventListener("dragstart", dragStart, false);
 			el.addEventListener("dragend", dragEnd, false);
@@ -66,20 +56,6 @@
 
 			});
 
-
-			// ************************************* FIXME: get multiple consecutive moves working
-
-			// highlight captured pieces as multiple consecutive
-			// moves are made
-
-			$rootScope.$on("the-raven", function(evt, data) {
-				if ( data.id == scope.piece.id ) {
-					scope.piece.captured = true;
-					console.log("captured: ", data.id);
-				}
-			});
-
-			
 
 			/**
 			 * @name		dragStart
@@ -101,14 +77,13 @@
 				let direction = scope.piece.direction;
 				let mustJump  = false;
 				let data      = {
-					gamePieceId: el.id,
+					gamePieceId: scope.piece.id,
 					sourceId   : sqId
 				};
 
-
 				// if there was a previous move it was a jump
 				// so this move must also be a jump
-				if ( scope.isMoving == scope.piece.id ) {
+				if ( scope.isMoving === scope.piece.id ) {
 					mustJump = true;
 				}
 
@@ -118,7 +93,10 @@
 
 				// is any move allowed from here?
 				if ( !possibleMoves.length ) {
-					evt.preventDefault();																		// FIXME: need to announce this back to game control
+
+					scope.yieldTurn({ pieceId: scope.piece.id });
+
+					evt.preventDefault();
 					return;
 				}
 
@@ -149,23 +127,22 @@
 				this.classList.remove("dragging");
 
 				moveTaken = possibleMoves.filter(move => {
-					return move.destination == lastMove.destination;
+					return move.destination === lastMove.destination;
 				})[0];
 
 				if (moveTaken) {
 
-					if ( moveTaken.captured ) {
-
-						obit.announce({ id: moveTaken.captured });
-					}
-
 					// if now king update data directly so this move
 					// can move all directions
 					if ( gamePosition.isInCrownHead( moveTaken.destination ) ) {
+<<<<<<< HEAD
+=======
+
+>>>>>>> consecutive
 						scope.piece.crown();
 					}
 					
-					scope.update()( { gamePiece: scope.piece, move: moveTaken } );
+					scope.update( { moveData: { gamePiece: scope.piece, move: moveTaken } } );
 				}
 			}
 		}
@@ -180,8 +157,8 @@
 	 * @param {Scope} $scope
 	 */
 	function GamePieceController($scope, $element) {
-		var vm = this;
 
+<<<<<<< HEAD
 		$scope.isDisabled = function() {
 
 			if ( !$scope.isMoving && $scope.piece.shade == $scope.inPlay ) {
@@ -197,5 +174,7 @@
 		$scope.isKing = function() {
 			return $scope.piece.crowned;
 		}
+=======
+>>>>>>> consecutive
 	}
 }());

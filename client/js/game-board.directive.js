@@ -7,16 +7,10 @@
 
 	function gameBoard($document, gamePositionService) {
 
-		let template = `<div class="game-board">
-											<div ng-transclude></div>
-										</div>`;
 
 		let directive = {
 			restrict    : "E",
-			controllerAs: "vm",
-			template    : template,
-			replace     : true,
-			transclude  : true,
+			controllerAs: "gbCtrl",
 			controller  : GameBoardController,
 			link        : gameBoardLink
 		}

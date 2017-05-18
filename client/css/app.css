@@ -16,8 +16,7 @@
 	padding-bottom: 100%;
 }
 
-.game-board,
-.game-board > div {
+game-board {
 	position: absolute;
 	width   : 100%;
 	height  : 100%;
@@ -29,7 +28,7 @@
 	to return likewise, so abutting squares do not share the
 	same values, eg. a.right/b.left, a.bottom/b.top
  */
-.playing-square {
+playing-square {
 	float           : left;
 	display         : block;
 	width           : 12.49999998%;
@@ -40,7 +39,7 @@
 }
 
 
-.testing .playing-square:after {
+.testing playing-square:after {
 	content : attr(id);
 	display : block;
 	position: absolute;
@@ -49,12 +48,12 @@
 	z-index : 100;
 }
 
-.playing-square:nth-child(8n+1) {
+playing-square:nth-child(8n+1) {
 	margin-left: 0;
 }
 
 
-.game-piece {
+game-piece {
 	display      : block;
 	width        : 90%;
 	height       : 90%;
@@ -70,7 +69,7 @@
 	box-shadow: 3px 2px 4px #555;
 }
 
-.game-piece.disabled {
+game-piece.disabled {
 	cursor: not-allowed;
 }
 

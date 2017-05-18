@@ -71,7 +71,7 @@
 				deferred.resolve(output);
 			}
 			catch(e) {
-				deferred.reject( e.getMessage() );
+				deferred.reject( e.message );
 			}
 
 			return deferred.promise;

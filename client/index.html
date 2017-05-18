@@ -9,15 +9,26 @@
 	<header>
 
 	</header>
-	<div class="container testing" ng-controller="GameCtrl">
-
+	<div class="container testing" ng-controller="GameCtrl as gameCtrl">
+		<h4>isMoving: {{ gameCtrl.isMoving }} -- inPlay: {{ gameCtrl.inPlay }} </h4>
 		<game-board id="game-board">
-			<playing-square ng-repeat="piece in gamePieceData track by $index"
-				data-sq-id="{{ $index + 1 }}"
-				data-piece="piece"
-				data-in-play="{{ inPlay }}"
-				data-is-moving="isMoving"
-				data-update="update"></playing-square>
+			<playing-square
+				ng-repeat="piece in gameCtrl.gamePieceData track by $index"
+				id="sq{{ $index + 1 }}"
+				droppable="true">
+
+				<game-piece ng-if="!!piece"
+					class="{{ piece.shade }}"
+					ng-class="{'king': piece.crowned, 'disabled': gameCtrl.isDisabled(piece.id, piece.shade), 'captured': piece.captured}"
+					data-piece="piece"
+					data-in-play="{{ gameCtrl.inPlay }}"
+					data-is-moving="gameCtrl.isMoving"
+					data-update="gameCtrl.update(moveData)"
+					data-yield-turn="gameCtrl.yieldTurn(pieceId)"
+					id="{{ piece.id }}"
+					draggable="true"></game-piece>
+
+				</playing-square>
 
 		</game-board>
 	</div>

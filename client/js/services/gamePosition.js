@@ -46,7 +46,7 @@
 
 			let board     = $document[0].querySelector("#game-board");
 			let boardRect = board.getBoundingClientRect();
-			let squares   = $document[0].querySelectorAll(".playing-square");
+			let squares   = $document[0].querySelectorAll("playing-square");
 			
 			boardPos = _roundRect(boardRect, boardPos);
 
@@ -72,7 +72,7 @@
 		function getPosition(id) {
 
 			return positions.filter(p => {
-				return p.id == id;
+				return p.id === id;
 			})[0];
 		}
 
@@ -131,7 +131,7 @@
 							// can opponent be jumped?
 							let jumpSqId = this.getNextNeighbourId(sourceId, sq.id);
 
-							if ( jumpSqId != null ) {	// if not at edge of game board
+							if ( jumpSqId !== null ) {	// if not at edge of game board
 
 								if ( gameData.isEmpty(jumpSqId) ) {
 
@@ -164,10 +164,10 @@
 
 			// filter for immediate neighbours
 			neighbours = positions.filter(dest => {
-				return ( dest.pos.right == source.left && dest.pos.bottom == source.top )
-					||	( dest.pos.left == source.right && dest.pos.bottom == source.top )
-					|| 	( dest.pos.left == source.right && dest.pos.top == source.bottom )
-					||	( dest.pos.right == source.left && dest.pos.top == source.bottom );
+				return ( dest.pos.right === source.left && dest.pos.bottom === source.top )
+					||	( dest.pos.left === source.right && dest.pos.bottom === source.top )
+					|| 	( dest.pos.left === source.right && dest.pos.top === source.bottom )
+					||	( dest.pos.right === source.left && dest.pos.top === source.bottom );
 			});
 
 
@@ -183,15 +183,15 @@
 
 			// reiterate to give relative directions
 			neighbours.forEach(dest => {
-				if ( dest.pos.right == source.left && dest.pos.bottom == source.top ) {
+				if ( dest.pos.right === source.left && dest.pos.bottom === source.top ) {
 
 					neighboursRelative.nw = dest;
 
-				} else if ( dest.pos.left == source.right && dest.pos.bottom == source.top ) {
+				} else if ( dest.pos.left === source.right && dest.pos.bottom === source.top ) {
 
 					neighboursRelative.ne = dest;
 
-				} else if ( dest.pos.left == source.right && dest.pos.top == source.bottom ) {
+				} else if ( dest.pos.left === source.right && dest.pos.top === source.bottom ) {
 
 					neighboursRelative.se = dest;
 
@@ -252,7 +252,7 @@
 			for (let k in startSq.pos) {
 				opposing = opposites[k];
 
-				if (startSq.pos[k] == betweenSq.pos[opposing]) {
+				if (startSq.pos[k] === betweenSq.pos[opposing]) {
 					// Corners meet. If k is "left", destination's "right"
 					// will equal between's "left", and so on
 					destinationSides[opposing] = betweenSq.pos[k];
@@ -319,11 +319,11 @@
 		function isInCrownHead(sqId) {
 
 			let sq = positions.filter(function(s) {
-				return s.id == sqId;
+				return s.id === sqId;
 			})[0];
 
 			if (sq) {
-				return ( sq.pos.top == boardPos.top || sq.pos.bottom == boardPos.bottom );
+				return ( sq.pos.top === boardPos.top || sq.pos.bottom === boardPos.bottom );
 			}
 
 			return false;
@@ -349,7 +349,7 @@
 		 */
 		function _roundRect(domRect, proxy) {
 
-			if ( proxy == undefined ) {
+			if ( proxy === undefined ) {
 				proxy = {};
 			}
 

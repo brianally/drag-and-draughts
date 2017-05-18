@@ -11,13 +11,17 @@
 
 			this.id        = `${shade}${id}`;
 			this.shade     = shade;
-			this.direction = ( shade == "white" ? -1 : 1 );		// hacky
-			this.crowned = false;
+
+			this.direction = ( shade === "white" ? -1 : 1 );
+			this.crowned   = false;
 		}
 
 
 		GamePiece.prototype.crown = function() {
-			this.crowned = true;
+
+			this.crowned   = true;
+			this.direction = 0;
+
 		}
 
 		return GamePiece;

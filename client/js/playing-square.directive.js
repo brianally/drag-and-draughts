@@ -15,32 +15,11 @@
 
 	function playingSquare($document, gamePosition, dataTransfer) {
 
-		var template = `<div	class="playing-square"
-													id="sq{{ sqId }}"
-													droppable="true">
-											<game-piece	ng-if="!!piece"
-												data-piece="piece"
-												data-in-play="{{ inPlay }}"
-												data-is-moving="isMoving"
-												data-dropped="dropped()"
-												data-update="update()"></game-piece>
-										</div>`;
-
-
 		var directive = {
 			restrict    : "E",
-			controllerAs: "vm",
-			scope: {
-				sqId    : "@",
-				piece   : "=",
-				inPlay  : "@",
-				isMoving: "=",
-				update  : "&"
-			},
-			replace   : true,
-			template  : template,
-			controller: PlayingSquareController,
-			link      : playingSquareLink
+			controllerAs: "psCtrl",
+			controller  : PlayingSquareController,
+			link        : playingSquareLink
 		}
 
 		return directive;
@@ -56,9 +35,7 @@
 		 */
 		function playingSquareLink(scope, element, attrs, controller) {
 			var el = element[0];
-
-			el.droppable = true;
-
+			
 			//el.addEventListener("dragenter", dragEnter, false);
 			el.addEventListener("dragover", dragOver, false);
 			el.addEventListener("drop", drop, false);
@@ -89,7 +66,6 @@
 			function leaveOrExit(evt) {
 				this.classList.remove("over");
 				this.classList.remove("warn");
-				//console.log(evt.type);
 			}
 			
 
@@ -141,7 +117,7 @@
 				// data.moves holds all possible moves for the piece. 
 				// Extract the one for this square.
 				moveTaken = data.moves.filter(m => {
-					return m.destination == evt.target.id;
+					return m.destination === evt.target.id;
 				})[0];
 
 				if (moveTaken) {
@@ -170,7 +146,6 @@
 	 * @param Scope $scope
 	 */
 	function PlayingSquareController($scope, $element) {
-		var vm = this;
 
 	}
 	
