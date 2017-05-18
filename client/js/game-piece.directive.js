@@ -135,10 +135,7 @@
 					// if now king update data directly so this move
 					// can move all directions
 					if ( gamePosition.isInCrownHead( moveTaken.destination ) ) {
-<<<<<<< HEAD
-=======
 
->>>>>>> consecutive
 						scope.piece.crown();
 					}
 					
@@ -158,7 +155,6 @@
 	 */
 	function GamePieceController($scope, $element) {
 
-<<<<<<< HEAD
 		$scope.isDisabled = function() {
 
 			if ( !$scope.isMoving && $scope.piece.shade == $scope.inPlay ) {
@@ -174,7 +170,5 @@
 		$scope.isKing = function() {
 			return $scope.piece.crowned;
 		}
-=======
->>>>>>> consecutive
 	}
 }());
