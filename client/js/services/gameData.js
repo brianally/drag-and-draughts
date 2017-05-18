@@ -8,10 +8,8 @@
 	function gameDataService($q, GamePiece) {
 
 		var data        = [];
-		var positions   = [];
-		var subscribers = {};
 
-		var service     = {
+		var service = {
 			initData  : initData,
 			getData   : getData,
 			update    : update,

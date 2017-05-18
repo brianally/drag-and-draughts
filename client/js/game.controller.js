@@ -21,7 +21,7 @@
 
 
 		$scope.inPlay = "white";
-		$scope.delay  = 0;
+		$scope.delay  = 2000;
 
 		// initialises the gamePieces
 		gameData.initData(numSquares, numPieces).then(function(data) {
