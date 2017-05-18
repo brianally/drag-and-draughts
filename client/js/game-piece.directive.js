@@ -16,10 +16,11 @@
 
 	function gamePiece($rootScope, $document, gamePosition, dataTransfer, obit) {
 
-		var template = `<div 	class="game-piece {{ piece.shade }}"
-													ng-class="{'king': piece.isKing(), 'disabled': isDisabled(), 'captured': piece.captured}"
+		var template = `<div 	id="{{ piece.id }}"
+													class="game-piece {{ piece.shade }}"
+													ng-class="{'king': isKing(), 'disabled': isDisabled(), 'captured': piece.captured}"
 													data-dir="{{ piece.direction }}"
-													data-piece-id="{{ piece.id }}"
+													id="{{ piece.id }}"
 													draggable="true"></div>`;
 
 		var directive = {
@@ -160,8 +161,7 @@
 
 					// if now king update data directly so this move
 					// can move all directions
-					if ( gamePosition.isInCrownHead( scope.piece.id ) ) {
-
+					if ( gamePosition.isInCrownHead( moveTaken.destination ) ) {
 						scope.piece.crown();
 					}
 					
@@ -192,6 +192,10 @@
 			}
 
 			return true;
+		}
+
+		$scope.isKing = function() {
+			return $scope.piece.crowned;
 		}
 	}
 }());
