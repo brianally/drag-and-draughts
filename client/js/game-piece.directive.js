@@ -1,24 +1,18 @@
 (function() {
 	"use strict";
 
-	let injections = [
-		"$rootScope",
-		"$document",
-		"gamePositionService",
-		"dataTransferService",
-		gamePiece
-	];
 
 	angular
 		.module("draughts")
-		.directive("gamePiece", injections);
+		.directive("gamePiece", gamePiece);
 
 
-	function gamePiece($rootScope, $document, gamePosition, dataTransfer) {
+	function gamePiece() {
 
 		var directive = {
 			restrict    : "E",
 			controllerAs: "gpCtrl",
+			bindToController: true,
 			scope: {
 				piece    : "=",
 				inPlay   : "@",
@@ -41,8 +35,8 @@
 		 * @param		Element element
 		 * @return	void
 		 */
-		function gamePieceLink(scope, element) {
-			var el            = element[0];
+		function gamePieceLink(scope, element, attrs, ctrl) {
+			var el = element[0];
 			var possibleMoves = [];
 
 
@@ -62,51 +56,15 @@
 			 * @summary	stops the timeout clock if it's running (if a previous
 			 *          move captured an opposing piece) and checks for possible moves
 			 * 
-			 * @param  DragEvent	evt
+			 * @param  DragEvent	event
 			 * @return void
 			 */
-			function dragStart(evt) {
+			function dragStart(event) {
 
-				if ( !el.classList.contains( scope.inPlay ) ) {
-					evt.preventDefault();
-					return;
+				if ( ctrl.handleDragStart(event, el) ) {
+					this.classList.add("dragging");
 				}
 
-				let sqId      = el.parentNode.id;
-				let shade     = scope.piece.shade;
-				let direction = scope.piece.direction;
-				let mustJump  = false;
-				let data      = {
-					gamePieceId: scope.piece.id,
-					sourceId   : sqId
-				};
-
-				// if there was a previous move it was a jump
-				// so this move must also be a jump
-				if ( scope.isMoving === scope.piece.id ) {
-					mustJump = true;
-				}
-
-				// get all moves from this position, including jumps
-				possibleMoves = gamePosition.getMoves(sqId, shade, direction, mustJump);
-
-
-				// is any move allowed from here?
-				if ( !possibleMoves.length ) {
-
-					scope.yieldTurn({ pieceId: scope.piece.id });
-
-					evt.preventDefault();
-					return;
-				}
-
-				// store possible moves
-				data.moves = possibleMoves;
-
-				dataTransfer.setAllowedEffect(evt, "move");
-				dataTransfer.setData(evt, data);
-				
-				this.classList.add("dragging");
 			}
 
 
@@ -116,59 +74,129 @@
 			 * @summary	pushes move taken onto the moves queue and
 			 * 					starts the timeout clock
 			 * 
-			 * @param  DragEvent	evt
+			 * @param  DragEvent	event
 			 * @return void
 			 */
-			function dragEnd(evt) {
-				let moveTaken = {};
-				let lastMove  = gamePosition.getLastMove();
-				let data      = dataTransfer.getData(evt);
+			function dragEnd(event) {
 
 				this.classList.remove("dragging");
 
-				moveTaken = possibleMoves.filter(move => {
-					return move.destination === lastMove.destination;
-				})[0];
-
-				if (moveTaken) {
-
-					// if now king update data directly so this move
-					// can move all directions
-					if ( gamePosition.isInCrownHead( moveTaken.destination ) ) {
-
-						scope.piece.crown();
-					}
-					
-					scope.update( { moveData: { gamePiece: scope.piece, move: moveTaken } } );
-				}
+				ctrl.handleDragEnd(event);
+				// event.preventDefault();
+				// return false;
 			}
 		}
 	}
 
 
-	GamePieceController.$inject = ["$scope"];
+	GamePieceController.$inject = ["$scope", "gamePositionService", "dataTransferService"];
 
 	/**
 	 * @name	GamePieceController
 	 * @summary	
 	 * @param {Scope} $scope
 	 */
-	function GamePieceController($scope, $element) {
+	function GamePieceController($scope, gamePosition, dataTransfer) {
 
-		$scope.isDisabled = function() {
+		var possibleMoves;
 
-			if ( !$scope.isMoving && $scope.piece.shade == $scope.inPlay ) {
+		this.handleDragStart = function(event, element) {
+
+			if ( !element.classList.contains( this.inPlay ) ) {
+				event.preventDefault();
 				return false;
 			}
-			else if ( $scope.isMoving == $scope.piece.id ) {
+
+			let sqId      = element.parentNode.id;
+			let shade     = this.piece.shade;
+			let direction = this.piece.direction;
+			let mustJump  = false;
+			let data      = {
+				gamePieceId: this.piece.id,
+				sourceId   : sqId
+			};
+
+			// if there was a previous move it was a jump
+			// so this move must also be a jump
+			if ( this.isMoving === this.piece.id ) {
+				mustJump = true;
+			}
+
+			// get all moves from this position, including jumps
+			possibleMoves = this.getMoves(sqId, shade, direction, mustJump);
+
+
+			// is any move allowed from here?
+			if ( !possibleMoves.length ) {
+
+				this.yieldTurn({ pieceId: this.piece.id });
+
+				event.preventDefault();
 				return false;
 			}
+
+			// store possible moves
+			data.moves = possibleMoves;
+
+			dataTransfer.setAllowedEffect(event, "move");
+			dataTransfer.setData(event, data);
 
 			return true;
 		}
 
-		$scope.isKing = function() {
-			return $scope.piece.crowned;
+
+
+
+
+		this.handleDragEnd = function(event) {
+				
+			let moveTaken = {};
+			let lastMove  = gamePosition.getLastMove();
+			
+			// cannot read in dragend???
+			//let data      = dataTransfer.getData(event);
+
+			moveTaken = possibleMoves.filter(move => {
+				return move.destination === lastMove.destination;
+			})[0];
+
+			if (moveTaken) {
+
+				// if now king update data directly so this move
+				// can move all directions
+				if ( gamePosition.isInCrownHead( moveTaken.destination ) ) {
+
+					this.piece.crown();
+				}
+
+				let sqId  = lastMove.destination;
+				let shade = this.piece.shade;
+				let dir   = this.piece.direction;
+
+				possibleMoves = this.getMoves(sqId, shade, dir, true);
+
+				let updateData = {
+					gamePiece: this.piece,
+					move     : moveTaken,
+					yieldPlay: possibleMoves.length === 0
+				};
+				
+				this.update( { moveData: updateData } );
+			}
+
 		}
+
+
+
+
+		this.getMoves = function(sqId, shade, direction, mustJump) {
+
+			return gamePosition.getMoves(sqId, shade, direction, mustJump);
+
+		}
+
+
+
+
 	}
 }());

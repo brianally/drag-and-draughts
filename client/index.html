@@ -10,7 +10,6 @@
 
 	</header>
 	<div class="container testing" ng-controller="GameCtrl as gameCtrl">
-		<h4>isMoving: {{ gameCtrl.isMoving }} -- inPlay: {{ gameCtrl.inPlay }} </h4>
 		<game-board id="game-board">
 			<playing-square
 				ng-repeat="piece in gameCtrl.gamePieceData track by $index"

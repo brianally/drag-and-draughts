@@ -2,7 +2,6 @@
 	"use strict";
 	let injections = [
 		"$scope",
-		"$timeout",
 		"gameDataService",
 		"gamePositionService",
 		gameCtrl
@@ -13,7 +12,7 @@
 		.controller("GameCtrl", injections);
 
 
-	function gameCtrl($scope, $timeout, gameData, gamePosition) {
+	function gameCtrl($scope, gameData, gamePosition) {
 
 		// this will be passed in by select list later
 		let numSquares = 32; // dark only; for a 64-sq board

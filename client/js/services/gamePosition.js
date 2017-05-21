@@ -287,13 +287,35 @@
 			return null;
 		}
 
+
+
+		/**
+		 * @name	getLastMove
+		 * @summary	gets the last move taken
+		 * 
+		 * @return BoardMove
+		 */
 		function getLastMove() {
 			return lastMove;
 		}
 
+
+
+		/**
+		 * @name	setLastMove
+		 * @summary	sets the last move taken
+		 * @desc		The last move taken must be saved in the "drop" handler function
+		 *        	so that it may be retrieved in the "dragend" handler. However,
+		 *        	the dataTransfer object is unavailable in dragend handler. (WHY?!)
+		 * 					Consequently the move is saved to this service so that it
+		 * 					may be retrieved in the other handler.
+		 * 					
+		 * @param BoardMove move
+		 */
 		function setLastMove(move) {
 			lastMove = move;
 		}
+
 
 
 		/**

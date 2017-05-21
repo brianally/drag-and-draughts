@@ -60,10 +60,10 @@
 			 * @name		leaveOrExit
 			 * @summary		removes css classes
 			 *        	
-			 * @param  DragEvent	evt
+			 * @param  DragEvent	event
 			 * @return void
 			 */
-			function leaveOrExit(evt) {
+			function leaveOrExit(event) {
 				this.classList.remove("over");
 				this.classList.remove("warn");
 			}
@@ -74,13 +74,13 @@
 			 * @summary		highlight entered square,
 			 *        	warn if not allowed.
 			 *        	
-			 * @param  DragEvent	evt
+			 * @param  DragEvent	event
 			 * @return void
 			 */
-			function dragEnter(evt) {
+			function dragEnter(event) {
 
 				// ensure not empty
-				if ( gamePosition.isOccupied(evt.target.id) ) {
+				if ( gamePosition.isOccupied(event.target.id) ) {
 					this.classList.add("warn");
 				} else {
 					this.classList.add("over");
@@ -92,11 +92,11 @@
 			 * @name		dragOver
 			 * @summary	calls preventDefault() so as to allow dropping
 			 * 
-			 * @param  DragEvent evt
+			 * @param  DragEvent event
 			 * @return void
 			 */
-			function dragOver(evt) {
-				evt.preventDefault();
+			function dragOver(event) {
+				event.preventDefault();
 			}
 
 
@@ -107,17 +107,17 @@
 			 *        	it: a) empty? b)in the correct direction?
 			 *        	If taking opponent's piece is it a valid jump?
 			 * 
-			 * @param  DragEvent	evt
+			 * @param  DragEvent	event
 			 * @return void
 			 */
-			function drop(evt) {
+			function drop(event) {
 				let moveTaken = {};
-				let data      = dataTransfer.getData(evt);
+				let data      = dataTransfer.getData(event);
 
 				// data.moves holds all possible moves for the piece. 
 				// Extract the one for this square.
 				moveTaken = data.moves.filter(m => {
-					return m.destination === evt.target.id;
+					return m.destination === event.target.id;
 				})[0];
 
 				if (moveTaken) {
@@ -129,12 +129,11 @@
 					// inside the game-piece directive. This is a workaround to save the
 					// move in the service so it can be picked up in the other directive.
 					gamePosition.setLastMove(moveTaken);
-
-					dataTransfer.setData(evt, moveTaken);
 				}
 				
 				
 				this.classList.remove("warn"); // why is this necessary?
+				event.preventDefault();
 			}
 		}
 	}

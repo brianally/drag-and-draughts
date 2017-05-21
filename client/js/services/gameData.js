@@ -156,10 +156,13 @@
 			else {
 				throw new Exception(`index not found from square IDs: ${moveData.move.source} ${moveData.move.destination}`);
 			}
-console.log(moveData.gamePiece);
+
+
+			let willBeMovingAgain = !moveData.yieldPlay &&  moveData.move.captured ? moveData.gamePiece.id : false;
+
 			return {
 				data    : data,
-				isMoving: moveData.move.captured ? moveData.gamePiece.id : false
+				isMoving: willBeMovingAgain
 			}
 		}
 

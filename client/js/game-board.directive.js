@@ -42,7 +42,7 @@
 	 * @param {Scope} $scope
 	 */
 	function GameBoardController($scope) {
-		var vm = this;
+		
 
 	}
 }());
